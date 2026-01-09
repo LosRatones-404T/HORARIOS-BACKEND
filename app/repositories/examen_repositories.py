@@ -28,6 +28,11 @@ def get_exams_period(db: Session, period: str, exam_type: str):
 # obtener especificaciones de examen por curso
 def get_exam_especifications_by_course(db: Session, course_id: str):
     return db.query(models.exam_especifications).filter(models.exam_especifications.id == course_id).first()
+
+
+
+
+# para otro repo     
 # otener cursos por carrera
 def get_courses_by_degree(db: Session, degree_id: int):
     return db.query(models.Course).filter(models.Course.degree_id == degree_id).all().orde

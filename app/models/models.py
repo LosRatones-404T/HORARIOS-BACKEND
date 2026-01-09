@@ -80,7 +80,11 @@ class Exam(Base):
     end_time = Column(Time)
 
     examen_type = Column(String, nullable=False, default="parcial") # "ordinario" o "parcial"
+
+    is_active = Column(Boolean, default=False) # generar función si el examen esta activo o no, lo revisa en base al exameen date y startr
     
+    examen_time_generated = Column(DateTime(timezone=True))
+    examen_generated_by = relationship("User")  # Usuario que generó el examen
     course = relationship("Course", back_populates="exam")
     classroom = relationship("Classroom")
 

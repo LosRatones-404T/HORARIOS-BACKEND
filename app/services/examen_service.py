@@ -1,4 +1,5 @@
 from math import e
+from operator import is_
 from app.models import models
 from requests import get, session
 from app.repositories.examen_repositories import get_courses_by_degree, get_all_classrooms, save_exam, get_exams_by_period, get_exam_especifications_by_course, get_current_exam_period
@@ -33,21 +34,22 @@ def generate_exam_for_course(db: session, id: str):
     if obtener_professor_for_exam(id, exam_especifications) is None: # Asignar profesor preferentemente el de la clase regular
         return None  # No hay profesor disponible para este examen
     
+    examen_generado.status = status_exam(examen_generado)
+
     return examen_generado
     
     
 
 
-def generate_exam_schedule_degree(db: session, degree_id: int):
+def generate_exam_schedule_degree(db: session, degree_id: str):
     courses = get_courses_by_degree(db, degree_id)
-    
 
     exams_conflict = []
     exams_created = []
 
     for course in courses:
-        exam_generate = generate_exam_for_course(course.id)
-        if not exam_generate:
+        exam_generate = generate_exam_for_course(course.id), 
+        if exam_generate is models.ScheduleConflict:
             exams_conflict.append(exam_generate)
         else:
             saved_exam = save_exam(db, exam_generate)
@@ -67,3 +69,17 @@ def obtener_classroom_for_exam(course_id, exam_especifications, classrooms, exam
 
 def obtener_professor_for_exam(course_id, exam_especifications):
     pass  # Lógica para obtener el profesor para el examen
+
+
+
+# Verifica si el estado del examen Realizado, en curso o Pendiente
+def status_exam(exam: models.Exam):
+    pass  # Lógica para determinar el estado del examen basado en la fecha y hora actual
+
+
+# Llena reporte de examen generados
+def fill_exam_report(exam_id: str):
+    pass  # Lógica para llenar un reporte de exámenes generados
+    reporte = models.GeneratedExamReport
+    reporte.exam_id = exam_id
+    
