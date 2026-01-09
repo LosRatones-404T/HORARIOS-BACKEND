@@ -64,7 +64,7 @@ class RegularSchedule(Base):
     course = relationship("Course", back_populates="regular_schedules")
 
 
-# 5. El Examen Generado (El Resultado)
+# 5. El Examen Generado
 class Exam(Base):
     __tablename__ = "examens"
     
@@ -79,7 +79,7 @@ class Exam(Base):
     start_time = Column(Time)
     end_time = Column(Time)
 
-    examen_type = Column(String, nullable=False, default="final") # "ordinario" o "parcial"
+    examen_type = Column(String, nullable=False, default="parcial") # "ordinario" o "parcial"
     
     course = relationship("Course", back_populates="exam")
     classroom = relationship("Classroom")
@@ -122,6 +122,7 @@ class exam_especifications(Base):
     tipo_examen = Column(String, nullable=False)  # Ej: "parcial", "ordinario"
     duracion_minutos = Column(Integer, nullable=False)  # Duración del examen en minutos
     requiere_sala_computo = Column(Boolean, default=False)  # Si el examen requiere sala de cómputo
+    periodo_actual = Column(String, nullable=False)  # Ej: "Enero 2024"
 
 # Conflicto en generacion de horarios
 class ScheduleConflict(Base):
@@ -131,3 +132,23 @@ class ScheduleConflict(Base):
     course_id_1 = Column(Integer, ForeignKey("courses.id"), nullable=False)
     course_id_2 = Column(Integer, ForeignKey("courses.id"), nullable=False)
     reason = Column(String, nullable=True)  # Razón del conflicto
+
+# Informe de examen generado
+class GeneratedExamReport(Base):
+    __tablename__ = "generated_exam_reports"
+
+    id = Column(Integer, primary_key=True, index=True)
+    course_id = Column(Integer, ForeignKey("courses.id"), nullable=False)
+    exam_id = Column(Integer, ForeignKey("examens.id"), nullable=False)
+    status = Column(String, nullable=False)  # Ej: "created", "conflict"
+    same_aula = Column(Boolean, default=False)  # Si se logró mantener el mismo aula
+    same_time = Column(Boolean, default=False)  # Si se logró mantener el mismo horario que clase regular
+    details = Column(String, nullable=True)  # Detalles adicionales sobre la generación
+
+class periodos_examenes(Base):
+    __tablename__ = "exam_periods"
+
+    id = Column(Integer, primary_key=True, index=True)
+    nombre_periodo = Column(String, unique=True, nullable=False)  # Ej: "Enero 2024"
+    fecha_inicio = Column(Date, nullable=False)
+    fecha_fin = Column(Date, nullable=False)

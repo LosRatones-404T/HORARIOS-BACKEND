@@ -1,5 +1,5 @@
 from math import e
-from models import models
+from app.models import models
 from requests import get, session
 from app.repositories.examen_repositories import get_courses_by_degree, get_all_classrooms, save_exam, get_exams_by_period, get_exam_especifications_by_course, get_current_exam_period
 
