@@ -1,3 +1,4 @@
+from repositories.examen_repositories import get_current_exam_period
 from fastapi import FastAPI
 from app.core.conexion import test_connection, create_tables
 from app.api import examen_routes
@@ -9,6 +10,8 @@ app = FastAPI(
     description="API para gestión de exámenes y horarios",
     version="1.0.0"
 )
+
+period_current = get_current_exam_period() # Obtener el periodo de examenes actual
 
 # Evento al iniciar la aplicación
 @app.on_event("startup")
