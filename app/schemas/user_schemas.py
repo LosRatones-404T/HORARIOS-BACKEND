@@ -11,10 +11,10 @@ class RoleEnum(str, Enum):
 
 
 class UserCreate(BaseModel):
-    username: str
-    email: Optional[EmailStr] = None
-    password: str
-    role: RoleEnum = RoleEnum.SECRETARIA
+    username: str = "admin"
+    email: Optional[EmailStr] = "j.lopezlopez1004@gmail.com"
+    password: str = "admin123"
+    role: RoleEnum = RoleEnum.ADMIN
 
 
 class UserRead(BaseModel):

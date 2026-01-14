@@ -13,6 +13,7 @@ router = APIRouter(prefix="/auth", tags=["auth"])
 
 @router.post("/register", response_model=UserRead, status_code=status.HTTP_201_CREATED)
 def register(user_in: UserCreate, db: Session = Depends(get_db)):
+    print("Registering user:", user_in.username)
     existing = authenticate_user(db, user_in.username, user_in.password)
     # simple check: username must be unique
     from app.repositories.user_repository import get_user_by_username
