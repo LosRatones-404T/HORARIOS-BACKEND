@@ -1,15 +1,26 @@
-
+from venv import create
+from warnings import deprecated
 from fastapi import FastAPI
 from app.core.conexion import test_connection, create_tables
 from app.api import examen_routes
 from app.api.auth_routes import router as auth_router
+import app.models.models as models # Asegura que los modelos se registren
+
+# importar sesión para crear usuario inicial
+from app.core.conexion import SessionLocal
+from passlib.context import CryptContext
+
+# Configuración de hashing para crear usuario demo
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
 
 # Crear la aplicación FastAPI
 app = FastAPI(
     title="Horarios API",
-    description="API para gestión de exámenes y horarios",
+    description="API para gestión horarios de examenes",
     version="1.0.0"
 )
+
 
 # Evento al iniciar la aplicación
 @app.on_event("startup")
@@ -20,8 +31,39 @@ async def startup_event():
     # Verificar conexión a la BD
     if test_connection():
         print("Base de datos conectada")
+        """"
         # Crear tablas si no existen
         create_tables()
+
+        # Crear usuario ADMIN por defecto si no existe ningun usuario
+        db = SessionLocal()
+        try:
+            user_count = db.query(models.User).count()
+            print(user_count)
+            if user_count == 0:
+                print("No hay usuarios en la base de datos. Creando usuario por defecto...")
+                admin_user = models.User(
+                    username="admin",
+                    email="unsis.siplex.unsis.edu.mx",
+                    hashed_password=pwd_context.hash("admin123"),
+                    role="admin",
+                    is_active = True
+                )
+                db.add(admin_user)
+                db.commit()
+                print("Usuario 'admin' creado con contraseña 'admin123'")
+            else:
+                print(f"Usuarios existentes en la base de datos: {user_count}. No se crea usuario por defecto.")
+        
+        
+        except Exception as e:
+            print(f"Error al crear usuario por defecto: {e}")
+        finally:
+            db.close()
+
+        """
+
+
         print("\nRutas disponibles:")
         print("   → http://localhost:8000")
         print("   → http://localhost:8000/docs")

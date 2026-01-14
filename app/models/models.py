@@ -84,7 +84,8 @@ class Exam(Base):
     is_active = Column(Boolean, default=False) # generar función si el examen esta activo o no, lo revisa en base al exameen date y startr
     
     examen_time_generated = Column(DateTime(timezone=True))
-    examen_generated_by = relationship("User")  # Usuario que generó el examen
+    id_generated_by = Column(Integer, ForeignKey("users.id"))  # Usuario que generó el examen
+    examen_generated_by = relationship("User", back_populates ="generated_exams")  # Usuario que generó el examen
     course = relationship("Course", back_populates="exam")
     classroom = relationship("Classroom")
 
@@ -109,6 +110,7 @@ class User(Base):
     role = Column(String(50), nullable=False, default="user")
     is_active = Column(Boolean, default=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
+    generated_exams1 = relationship("Exam", back_populates="examen_generated_by")
 
 class Degree(Base):
     __tablename__ = "degrees"
@@ -119,7 +121,7 @@ class Degree(Base):
     is_active = Column(Boolean, default=True)
 
 # Especificaciones para examen
-class exam_especifications(Base):
+class ExamSpecifications(Base):
     __tablename__ = "exam_specifications"
 
     id = Column(Integer, primary_key=True, index=True) # tal vez utilizar course_id como PK
@@ -149,7 +151,7 @@ class GeneratedExamReport(Base):
     same_time = Column(Boolean, default=False)  # Si se logró mantener el mismo horario que clase regular
     details = Column(String, nullable=True)  # Detalles adicionales sobre la generación
 
-class periodos_examenes(Base):
+class PeriodosExamenes(Base):
     __tablename__ = "exam_periods"
 
     id = Column(Integer, primary_key=True, index=True)
