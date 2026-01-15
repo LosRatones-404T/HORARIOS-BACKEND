@@ -51,12 +51,18 @@ def get_exam_especifications_by_course(db: Session, course_id: int):
     ).first()
 
 
+# guardar examen
+def save_exam(db: Session, exam: models.Exam):
+    db.add(exam)
+    db.commit()
+    db.refresh(exam)
+    return exam
 
 
-# para otro repo     
+# para otro repo de datos de unsis #################
 # otener cursos por carrera
-def get_courses_by_degree(db: Session, degree_id: int):
-    # TODO: Course model does not have degree_id. Update model or query logic.
+def get_courses_by_degree(db: Session, degree_id: str):
+    # TODO: devolver materias activas por carrera 
     # return db.query(models.Course).filter(models.Course.degree_id == degree_id).all()
     return []
 
@@ -64,9 +70,20 @@ def get_courses_by_degree(db: Session, degree_id: int):
 def get_all_classrooms(db: Session):
     return db.query(unsis.Aula).all()
 
-# guardar examen
-def save_exam(db: Session, exam: models.Exam):
-    db.add(exam)
-    db.commit()
-    db.refresh(exam)
-    return exam
+# obtener grupos por carrera
+def get_grupos_by_degree(db: Session, degree_id: str):
+    return db.query(unsis.Grupo).filter(unsis.Grupo.carrera_id == degree_id).all()
+
+# obtener grupos por carrera y semestre
+def get_grupos_by_degree_and_semester(db: Session, degree_id: str, semester: int):
+    return db.query(unsis.Grupo).filter(
+        unsis.Grupo.carrera_id == degree_id,
+        unsis.Grupo.semestre == semester
+    ).all()
+
+# obtener periodo actual de unsis
+def get_current_unsis_period(db: Session):
+    current_period = db.query(unsis.Periodo).order_by(unsis.Periodo.id.desc()).first()
+    if current_period:
+        return current_period.clave
+    return None
