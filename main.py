@@ -56,3 +56,7 @@ def health():
 # Registrar routers adicionales
 app.include_router(auth_router)
 app.include_router(examen_routes.router)
+
+# Importar y registrar el router de sincronización
+from app.api.sync_routes import router as sync_router
+app.include_router(sync_router)
