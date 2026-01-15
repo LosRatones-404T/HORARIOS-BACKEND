@@ -1,15 +1,13 @@
-from math import e
-from operator import is_
+from sqlalchemy.orm import Session
 from app.models import models
-from requests import get, session
-from app.repositories.examen_repositories import get_courses_by_degree, get_all_classrooms, save_exam, get_exams_by_period, get_exam_especifications_by_course, get_current_exam_period
+from app.repositories.examen_repositories import get_courses_by_degree, get_all_classrooms, save_exam, get_exams_by_period, get_exams_period, get_exam_especifications_by_course, get_current_exam_period
 
-def generate_exam_for_course(db: session, id: str):
-    pass  # Lógica para generar un examen para un curso específico
+def generate_exam_for_course(db: Session, id: str):
+    # Lógica para generar un examen para un curso específico
     # Datos necesarios
     exam_especifications = get_exam_especifications_by_course(db, id)
     classrooms = get_all_classrooms(db)
-    exams = get_exams_by_period(db, get_current_exam_period(db), exam_especifications.tipo_examen)
+    exams = get_exams_period(db, get_current_exam_period(db), exam_especifications.tipo_examen)
     examen_generado = models.Exam(
         course_id=id,
         exam_date=None,
@@ -30,11 +28,11 @@ def generate_exam_for_course(db: session, id: str):
     if obtener_classroom_for_exam(id, exam_especifications, classrooms, exams) is None: # Asignr aula preferentemente aula de clase regular
         return None  # No hay aulas disponibles para este examen
     
-    examen_generado.professor_id = obtener_professor_for_exam(id, exam_especifications)
-    if obtener_professor_for_exam(id, exam_especifications) is None: # Asignar profesor preferentemente el de la clase regular
-        return None  # No hay profesor disponible para este examen
+    # examen_generado.professor_id = obtener_professor_for_exam(id, exam_especifications)
+    # if obtener_professor_for_exam(id, exam_especifications) is None: # Asignar profesor preferentemente el de la clase regular
+    #     return None  # No hay profesor disponible para este examen
     
-    examen_generado.status = status_exam(examen_generado)
+    # examen_generado.status = status_exam(examen_generado)
 
     return examen_generado
     
