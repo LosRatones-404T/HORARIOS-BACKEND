@@ -75,3 +75,55 @@ def generate_exam_schedule(degree_id: int, db: Session = Depends(get_db)):
     return {"message": f"Se generaron {len(exams_created)} exámenes para la carrera con ID {degree_id}."}
 
 
+# obtener periodo aun en proceso de correción
+@router.get("/current-period", response_model=MessageResponse)
+def get_current_exam_period(db: Session = Depends(get_db)):
+    """
+    Retorna el periodo actual de exámenes.
+    """
+    from app.repositories.examen_repositories import get_current_exam_period
+
+    current_period = get_current_exam_period(db)
+
+    if not current_period:
+        raise HTTPException(status_code=404, detail="No se encontró un periodo de exámenes activo.")
+
+    return {"message": f"El periodo actual de exámenes es: {current_period}."}
+
+# obtener carreraas activas
+@router.get("/degrees", response_model=List[MessageResponse])
+def get_active_degrees(db: Session = Depends(get_db)):
+    """
+    Retorna la lista de carreras activas.
+    """
+    from app.repositories.examen_repositories import get_all_degrees
+
+    degrees = get_all_degrees(db)
+
+    if not degrees:
+        raise HTTPException(status_code=404, detail="No se encontraron carreras activas.")
+
+    results = []
+    for degree in degrees:
+        results.append({"message": f"Carrera: {degree.name}, Jefe: {degree.jefe_carrera}"})
+
+    return results
+
+# obtener aulas 
+@router.get("/classrooms", response_model=List[MessageResponse])
+def get_all_classrooms(db: Session = Depends(get_db)):
+    """
+    Retorna la lista de aulas disponibles.
+    """
+    from app.repositories.examen_repositories import get_all_classrooms
+
+    classrooms = get_all_classrooms(db)
+
+    if not classrooms:
+        raise HTTPException(status_code=404, detail="No se encontraron aulas disponibles.")
+
+    results = []
+    for classroom in classrooms:
+        results.append({"message": f"Aula: {classroom.nombre}, Capacidad: {classroom.capacidad}, Tipo: {classroom.tipo}"})
+
+    return results

@@ -1,36 +1,54 @@
+from app.models import unsis
 import app.models.models as models
 from sqlalchemy.orm import Session
 
 # obtener periodo actual de examenes
 def get_current_exam_period(db: Session):
-    # Suponiendo que hay una tabla o configuración que almacena el periodo actual
-    current_period = db.query(models.ExamPeriod).order_by(models.ExamPeriod.id.desc()).first()
+    # Obtener el periodo de exámenes más reciente
+    current_period = db.query(models.PeriodosExamenes).order_by(models.PeriodosExamenes.id.desc()).first()
     if current_period:
         return current_period.nombre_periodo
     return None
 
 # obtener todas las carreras
 def get_all_degrees(db: Session):
-    return db.query(models.Degree).all()
+    return db.query(unsis.Carrera).all()
 
 # obtener examenes generados por periodo
 def get_exams_by_period(db: Session, period: str):
-    # Modified to join with exam_specifications since Course doesn't have period
-    return db.query(models.Exam).join(models.Course).join(models.ExamSpecification, models.Course.id == models.ExamSpecification.id).filter(models.ExamSpecification.periodo_actual == period).all()
+    # Buscar exámenes que tengan especificaciones con el periodo especificado
+    return db.query(models.Exam).join(
+        models.ExamSpecifications, 
+        models.Exam.course_id == models.ExamSpecifications.id
+    ).filter(
+        models.ExamSpecifications.periodo_actual == period
+    ).all()
 
 # obtener examenes generados por periodo y curso
 def get_exams_by_period_and_course(db: Session, period: str, course_id: int):
-    # Modified to join with exam_specifications
-    return db.query(models.Exam).join(models.Course).join(models.ExamSpecification, models.Course.id == models.ExamSpecification.id).filter(models.ExamSpecification.periodo_actual == period, models.Exam.course_id == course_id).all()
+    return db.query(models.Exam).join(
+        models.ExamSpecifications, 
+        models.Exam.course_id == models.ExamSpecifications.id
+    ).filter(
+        models.ExamSpecifications.periodo_actual == period,
+        models.Exam.course_id == course_id
+    ).all()
 
 # obtener examenes generados en el periodo de examenes actual
 def get_exams_period(db: Session, period: str, exam_type: str):
-    # Modified to join with exam_specifications
-    return db.query(models.Exam).join(models.Course).join(models.ExamSpecification, models.Course.id == models.ExamSpecification.id).filter(models.ExamSpecification.periodo_actual == period, models.Exam.examen_type == exam_type).all()
+    return db.query(models.Exam).join(
+        models.ExamSpecifications, 
+        models.Exam.course_id == models.ExamSpecifications.id
+    ).filter(
+        models.ExamSpecifications.periodo_actual == period,
+        models.Exam.examen_type == exam_type
+    ).all()
 
 # obtener especificaciones de examen por curso
-def get_exam_especifications_by_course(db: Session, course_id: str):
-    return db.query(models.ExamSpecification).filter(models.ExamSpecification.id == course_id).first()
+def get_exam_especifications_by_course(db: Session, course_id: int):
+    return db.query(models.ExamSpecifications).filter(
+        models.ExamSpecifications.id == course_id
+    ).first()
 
 
 
@@ -44,7 +62,7 @@ def get_courses_by_degree(db: Session, degree_id: int):
 
 # obtener aulas
 def get_all_classrooms(db: Session):
-    return db.query(models.Classroom).all()
+    return db.query(unsis.Aula).all()
 
 # guardar examen
 def save_exam(db: Session, exam: models.Exam):

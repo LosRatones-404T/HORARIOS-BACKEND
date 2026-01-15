@@ -39,14 +39,14 @@ def generate_exam_for_course(db: Session, id: str):
     
 
 
-def generate_exam_schedule_degree(db: session, degree_id: str):
+def generate_exam_schedule_degree(db: Session, degree_id: str):
     courses = get_courses_by_degree(db, degree_id)
 
     exams_conflict = []
     exams_created = []
 
     for course in courses:
-        exam_generate = generate_exam_for_course(course.id), 
+        exam_generate = generate_exam_for_course(db, course.id)
         if exam_generate is models.ScheduleConflict:
             exams_conflict.append(exam_generate)
         else:
