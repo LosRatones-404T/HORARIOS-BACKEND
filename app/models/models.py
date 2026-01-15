@@ -14,6 +14,14 @@ class Classroom(Base):
     
 
 
+# 2. Modelo de Profesor
+class Professor(Base):
+    __tablename__ = "professors"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    full_name = Column(String, index=True, nullable=False)
+    # ID externo por si sincronizas con otro sistema de la universidad
+    external_id = Column(String, unique=True, nullable=True) 
 
 
 # 3. Modelo de Materia (EL NÚCLEO)
@@ -64,6 +72,18 @@ class RegularSchedule(Base):
     course = relationship("Course", back_populates="regular_schedules")
 
 
+class User(Base):
+    __tablename__ = "users"
+
+    id = Column(Integer, primary_key=True, index=True)
+    username = Column(String(50), unique=True, index=True, nullable=False)
+    email = Column(String(120), unique=True, index=True, nullable=True)
+    hashed_password = Column(String, nullable=False)
+    role = Column(String(50), nullable=False, default="user")
+    is_active = Column(Boolean, default=True)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+
 # 5. El Examen Generado
 class Exam(Base):
     __tablename__ = "examens"
@@ -84,31 +104,14 @@ class Exam(Base):
     is_active = Column(Boolean, default=False) # generar función si el examen esta activo o no, lo revisa en base al exameen date y startr
     
     examen_time_generated = Column(DateTime(timezone=True))
-    examen_generated_by = relationship("User")  # Usuario que generó el examen
+    
+    # Fixed: Added FK for user relationship
+    generated_by_id = Column(Integer, ForeignKey("users.id"), nullable=True)
+    examen_generated_by = relationship("User", foreign_keys=[generated_by_id])  # Usuario que generó el examen
+    
     course = relationship("Course", back_populates="exam")
     classroom = relationship("Classroom")
 
-
-# 2. Modelo de Profesor
-class Professor(Base):
-    __tablename__ = "professors"
-    
-    id = Column(Integer, primary_key=True, index=True)
-    full_name = Column(String, index=True, nullable=False)
-    # ID externo por si sincronizas con otro sistema de la universidad
-    external_id = Column(String, unique=True, nullable=True) 
-
-
-class User(Base):
-    __tablename__ = "users"
-
-    id = Column(Integer, primary_key=True, index=True)
-    username = Column(String(50), unique=True, index=True, nullable=False)
-    email = Column(String(120), unique=True, index=True, nullable=True)
-    hashed_password = Column(String, nullable=False)
-    role = Column(String(50), nullable=False, default="user")
-    is_active = Column(Boolean, default=True)
-    created_at = Column(DateTime(timezone=True), server_default=func.now())
 
 class Degree(Base):
     __tablename__ = "degrees"
@@ -156,3 +159,4 @@ class periodos_examenes(Base):
     nombre_periodo = Column(String, unique=True, nullable=False)  # Ej: "Enero 2024"
     fecha_inicio = Column(Date, nullable=False)
     fecha_fin = Column(Date, nullable=False)
+

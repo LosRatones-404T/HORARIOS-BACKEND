@@ -33,6 +33,8 @@ Base = declarative_base()
 # Función para crear las tablas en la BD
 def create_tables():
     """Crea todas las tablas definidas en los modelos"""
+    # Importar todos los modelos para que sean registrados por SQLAlchemy
+    from app.models import models, unsis
     Base.metadata.create_all(bind=engine)
 
 
