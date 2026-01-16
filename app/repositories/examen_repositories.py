@@ -87,3 +87,4 @@ def get_current_unsis_period(db: Session):
     if current_period:
         return current_period.clave
     return None
+

@@ -31,10 +31,10 @@ async def startup_event():
     # Verificar conexión a la BD
     if test_connection():
         print("Base de datos conectada")
-        """"
+        
         # Crear tablas si no existen
         create_tables()
-
+        """
         # Crear usuario ADMIN por defecto si no existe ningun usuario
         db = SessionLocal()
         try:

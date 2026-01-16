@@ -1,6 +1,6 @@
 # repositories/sync_repository.py
 from sqlalchemy.orm import Session
-from app.models.unsis import Carrera, Grupo, Periodo, Aula
+from app.models.unsis import Carrera, Grupo, Periodo, Aula, Profesor, Materia, Horario
 
 class SyncRepository:
     def __init__(self, db: Session):
@@ -50,3 +50,47 @@ class SyncRepository:
                 setattr(obj, k, v)
         else:
             self.db.add(Aula(**data))
+
+    def upsert_profesor(self, id_prof, nombre):
+        if not id_prof: return None
+        obj = self.db.query(Profesor).filter(Profesor.id == id_prof).first()
+        if not obj:
+            obj = Profesor(id=id_prof, nombre=nombre)
+            self.db.add(obj)
+            self.db.flush() # Para que esté disponible inmediatamente en la sesión
+        return obj
+
+    def upsert_materia(self, id_mat, nombre):
+        if not id_mat: return None
+        obj = self.db.query(Materia).filter(Materia.id == id_mat).first()
+        if not obj:
+            obj = Materia(id=id_mat, nombre=nombre)
+            self.db.add(obj)
+            self.db.flush()
+        return obj
+
+    def upsert_horario(self, item: dict):
+        # 1. Asegurar dependencias
+        self.upsert_profesor(item.get('idprofesor'), item.get('nombreCompleto'))
+        self.upsert_materia(item.get('asignatura'), item.get('materia'))
+        
+        # 2. Guardar Horario
+        horario_id = item['rowId']
+        obj = self.db.query(Horario).filter(Horario.id == horario_id).first()
+        
+        # Datos limpios para el modelo
+        datos_horario = {
+            "id": horario_id,
+            "dia": item['dia'],
+            "hora": item['hora'],
+            "grupo_id": item['idGrupo'],
+            "aula_id": item['idAula'] if item['idAula'] else None, # Manejar vacíos
+            "profesor_id": item['idprofesor'],
+            "materia_id": item['asignatura']
+        }
+
+        if obj:
+            for k, v in datos_horario.items():
+                setattr(obj, k, v)
+        else:
+            self.db.add(Horario(**datos_horario))

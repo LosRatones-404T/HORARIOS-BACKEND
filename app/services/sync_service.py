@@ -42,6 +42,20 @@ class SyncService:
                 g_valido = GrupoSchema(**g)
                 self.repo.upsert_grupo(g_valido.model_dump())
 
+            print("Sincronizando Horarios Completos...")
+            
+            # endpoint ej: /horarios_completos
+            data_dict = self._fetch_data("/horarios/todos") 
+            
+            # El JSON es un Dict: {"104-A": [obj, obj], "106-A": [...]}
+            # Iteramos sobre las llaves (Grupos)
+            for grupo_key, lista_horarios in data_dict.items():
+                
+                for item in lista_horarios:
+                    # Validar datos básicos (opcional usar Schema aquí)
+                    # upsert
+                    self.repo.upsert_horario(item)
+
             # Confirmar cambios en BD
             self.repo.db.commit()
             return {"status": "Sincronización exitosa"}
