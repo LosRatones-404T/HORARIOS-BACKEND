@@ -99,6 +99,11 @@ def health():
 app.include_router(auth_router)
 app.include_router(examen_routes.router)
 
+
 # Importar y registrar el router de sincronización
 from app.api.sync_routes import router as sync_router
 app.include_router(sync_router)
+
+# importar y registrar el router de unsis
+from app.api.unsis_routes import router as unsis_router
+app.include_router(unsis_router)
