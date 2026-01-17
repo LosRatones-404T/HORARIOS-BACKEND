@@ -107,3 +107,7 @@ app.include_router(sync_router)
 # importar y registrar el router de unsis
 from app.api.unsis_routes import router as unsis_router
 app.include_router(unsis_router)
+
+# importar y registrar el router de usuarios
+from app.api.users_routes import router as users_router
+app.include_router(users_router)
