@@ -1,6 +1,7 @@
 from venv import create
 from warnings import deprecated
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from app.core.conexion import test_connection, create_tables
 from app.api import examen_routes
 from app.api.auth_routes import router as auth_router
@@ -19,6 +20,15 @@ app = FastAPI(
     title="Horarios API",
     description="API para gestión horarios de examenes",
     version="1.0.0"
+)
+
+# Configurar CORS
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5173"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 
