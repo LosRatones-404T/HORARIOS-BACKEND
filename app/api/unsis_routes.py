@@ -1,3 +1,4 @@
+from app.schemas.unsis_schemas import GrupoResponse, AulaResponse, CarreraResponse, PeriodoExamenResponse, MateriaResponse, HorarioResponse, ProfesorResponse, MateriaResponse
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from typing import List
@@ -5,6 +6,9 @@ from app.core.conexion import get_db
 from app.models import models
 
 from app.schemas.examen_schemas import ExamResponse, MessageResponse
+from app.repositories import unsis_repository
+from app.repositories import examen_repositories
+from app.models import unsis
 
 router = APIRouter(
     prefix="/unsis",
@@ -12,126 +16,188 @@ router = APIRouter(
 )
 
 # obtener periodo aun en proceso de correción
-@router.get("/current-period", response_model=MessageResponse)
+@router.get("/current-period", response_model=PeriodoExamenResponse)
 def get_current_exam_period(db: Session = Depends(get_db)):
     """
-    Retorna el periodo actual de exámenes.
+    Retorna el periodo actual de exámenes en formato JSON estándar.
     """
-    from app.repositories.examen_repositories import get_current_exam_period
-
-    current_period = get_current_exam_period(db)
+    current_period = db.query(models.PeriodosExamenes).order_by(models.PeriodosExamenes.id.desc()).first()
 
     if not current_period:
         raise HTTPException(status_code=404, detail="No se encontró un periodo de exámenes activo.")
 
-    return {"message": f"El periodo actual de exámenes es: {current_period}."}
+    return current_period
 
 # obtener carreraas activas
-@router.get("/degrees", response_model=List[MessageResponse])
+@router.get("/degrees", response_model=List[CarreraResponse])
 def get_active_degrees(db: Session = Depends(get_db)):
     """
-    Retorna la lista de carreras activas.
+    Retorna la lista de carreras activas en formato JSON estándar.
     """
-    from app.repositories.examen_repositories import get_all_degrees
-
-    degrees = get_all_degrees(db)
+    degrees = unsis_repository.get_active_degrees(db)
 
     if not degrees:
         raise HTTPException(status_code=404, detail="No se encontraron carreras activas.")
 
-    results = []
-    for degree in degrees:
-        results.append({"message": f"Carrera: {degree.name}, Jefe: {degree.jefe_carrera}"})
-
-    return results
+    return degrees
 
 # obtener aulas 
-@router.get("/classrooms", response_model=List[MessageResponse])
+@router.get("/classrooms", response_model=List[AulaResponse])
 def get_all_classrooms(db: Session = Depends(get_db)):
     """
-    Retorna la lista de aulas disponibles.
+    Retorna la lista de aulas disponibles en formato JSON estándar.
     """
-    from app.repositories.examen_repositories import get_all_classrooms
-
-    classrooms = get_all_classrooms(db)
+    classrooms = unsis_repository.get_all_classrooms(db)
 
     if not classrooms:
         raise HTTPException(status_code=404, detail="No se encontraron aulas disponibles.")
 
-    results = []
-    for classroom in classrooms:
-        results.append({"message": f"Aula: {classroom.nombre}, Capacidad: {classroom.capacidad}, Tipo: {classroom.tipo}"})
-
-    return results
+    return classrooms
 ####################GRUPOS#########################
 # obtener todos los grupos
-@router.get("/groups", response_model=List[MessageResponse])
+@router.get("/groups", response_model=List[GrupoResponse])
 def get_all_groups(db: Session = Depends(get_db)):
     """
-    Retorna la lista de grupos.
+    Retorna la lista de grupos en formato JSON estándar.
     """
-    from app.models import unsis
-
-    groups = db.query(unsis.Grupo).all()
+    groups = unsis_repository.get_all_groups(db)
 
     if not groups:
         raise HTTPException(status_code=404, detail="No se encontraron grupos.")
 
-    results = []
-    for group in groups:
-        results.append({"message": f"Grupo: {group.nombre}, Carrera ID: {group.carrera_id}, Periodo ID: {group.periodo_id}"})
-
-    return results
+    return groups
 
 # Obtenr grupos por carrera
-@router.get("/groups-by-degree/{degree_id}", response_model=List[MessageResponse])
+@router.get("/groups-by-degree/{degree_id}", response_model=List[GrupoResponse])
 def get_groups_by_degree(degree_id: str, db: Session = Depends(get_db)):
     """
-    Retorna la lista de grupos para una carrera específica.
+    Retorna la lista de grupos para una carrera específica en formato JSON estándar.
     """
-    from app.repositories.examen_repositories import get_grupos_by_degree
-
-    groups = get_grupos_by_degree(db, degree_id)
+    groups = unsis_repository.get_grupos_by_degree(db, degree_id)
 
     if not groups:
         raise HTTPException(status_code=404, detail="No se encontraron grupos para la carrera especificada.")
 
-    results = []
-    for group in groups:
-        results.append({"message": f"Grupo: {group.nombre}, Carrera ID: {group.carrera_id}, Periodo ID: {group.periodo_id}"})
-
-    return results
+    return groups
 
 # obtener grupos por carrera y semestre
-@router.get("/groups-by-degree-and-semester/{degree_id}/{semester}", response_model=List[MessageResponse])
+@router.get("/groups-by-degree-and-semester/{degree_id}/{semester}", response_model=List[GrupoResponse])
 def get_groups_by_degree_and_semester(degree_id: str, semester: int, db: Session = Depends(get_db)):
     """
-    Retorna la lista de grupos para una carrera y semestre específicos.
+    Retorna la lista de grupos para una carrera y semestre específicos en formato JSON estándar.
     """
-    from app.repositories.examen_repositories import get_grupos_by_degree_and_semester
-
-    groups = get_grupos_by_degree_and_semester(db, degree_id, semester)
+    groups = unsis_repository.get_grupos_by_degree_and_semester(db, degree_id, semester)
 
     if not groups:
         raise HTTPException(status_code=404, detail="No se encontraron grupos para la carrera y semestre especificados.")
 
-    results = []
-    for group in groups:
-        results.append({"message": f"Grupo: {group.nombre}, Carrera ID: {group.carrera_id}, Periodo ID: {group.periodo_id}, Semestre: {group.semestre}"})
+    return groups
 
-    return results
-
-# obtener periodo actual de unsis
-@router.get("/current-unsis-period", response_model=MessageResponse)
-def get_current_unsis_period(db: Session = Depends(get_db)):
+# obtener grupos por materia
+@router.get("/groups-by-subject/{subject_id}", response_model=List[GrupoResponse])
+def get_groups_by_subject(subject_id: str, db: Session = Depends(get_db)):
     """
-    Retorna el periodo actual de Unsis.
+    Retorna la lista de grupos que cursan una materia específica en formato JSON estándar.
     """
-    from app.repositories.examen_repositories import get_current_unsis_period
+    groups = unsis_repository.get_groups_by_subject(db, subject_id)
 
-    current_period = get_current_unsis_period(db)
+    if not groups:
+        raise HTTPException(status_code=404, detail="No se encontraron grupos para la materia especificada.")
 
-    if not current_period:
-        raise HTTPException(status_code=404, detail="No se encontró un periodo actual en Unsis.")
+    return groups
 
-    return {"message": f"El periodo actual de Unsis es: {current_period}."}
+####################MATERIAS#########################
+# obtener todas las materias
+@router.get("/subjects", response_model=List[MateriaResponse])
+def get_all_subjects(db: Session = Depends(get_db)):
+    """
+    Retorna la lista de materias en formato JSON estándar.
+    """
+    subjects = unsis_repository.get_all_subjects(db)
+
+    if not subjects:
+        raise HTTPException(status_code=404, detail="No se encontraron materias.")
+
+    return subjects
+
+# obtener materias por carrera
+@router.get("/subjects-by-degree/{degree_id}", response_model=List[MateriaResponse])
+def get_subjects_by_degree(degree_id: str, db: Session = Depends(get_db)):
+    """
+    Retorna la lista de materias para una carrera específica en formato JSON estándar.
+    """
+    subjects = unsis_repository.get_subjects_by_degree(db, degree_id)
+
+    if not subjects:
+        raise HTTPException(status_code=404, detail="No se encontraron materias para la carrera especificada.")
+
+    return subjects
+
+# obtener materias por carrera y semestre
+@router.get("/subjects-by-degree-and-semester/{degree_id}/{semester}", response_model=List[MateriaResponse])
+def get_subjects_by_degree_and_semester(degree_id: str, semester: int, db: Session = Depends(get_db)):
+    """
+    Retorna la lista de materias para una carrera y semestre específicos en formato JSON estándar.
+    """
+    subjects = unsis_repository.get_subjects_by_degree_and_semester(db, degree_id, semester)
+
+    if not subjects:
+        raise HTTPException(status_code=404, detail="No se encontraron materias para la carrera y semestre especificados.")
+
+    return subjects
+
+####################HORARIOS#########################
+# obtener todos los horarios
+@router.get("/schedules", response_model=List[HorarioResponse])
+def get_all_schedules(db: Session = Depends(get_db)):
+    """
+    Retorna la lista de horarios en formato JSON estándar.
+    """
+    schedules = unsis_repository.get_all_schedules(db)
+
+    if not schedules:
+        raise HTTPException(status_code=404, detail="No se encontraron horarios.")
+
+    return schedules
+
+# obtener horarios por grupo
+@router.get("/schedules-by-group/{group_id}", response_model=List[HorarioResponse])
+def get_schedules_by_group(group_id: str, db: Session = Depends(get_db)):
+    """
+    Retorna la lista de horarios para un grupo específico en formato JSON estándar.
+    """
+    schedules = unsis_repository.get_schedules_by_group(db, group_id)
+
+    if not schedules:
+        raise HTTPException(status_code=404, detail="No se encontraron horarios para el grupo especificado.")
+
+    return schedules
+
+####################PROFESORES#########################
+# obtener todos los profesores
+@router.get("/professors", response_model=List[ProfesorResponse])
+def get_all_professors(db: Session = Depends(get_db)):
+    """
+    Retorna la lista de profesores en formato JSON estándar.
+    """
+    professors = unsis_repository.get_all_professors(db)
+
+    if not professors:
+        raise HTTPException(status_code=404, detail="No se encontraron profesores.")
+
+    return professors
+
+# obtener profesores por materia
+@router.get("/professors-by-subject/{subject_id}", response_model=List[ProfesorResponse])
+def get_professors_by_subject(subject_id: str, db: Session = Depends(get_db)):
+    """
+    Retorna la lista de profesores que imparten una materia específica en formato JSON estándar.
+    """
+    professors = unsis_repository.get_professors_by_subject(db, subject_id)
+
+    if not professors:
+        raise HTTPException(status_code=404, detail="No se encontraron profesores para la materia especificada.")
+
+    return professors
+
+

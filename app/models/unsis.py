@@ -25,6 +25,27 @@ class Periodo(Base):
     tipo: Mapped[str] = mapped_column(String(5))      # Ej: "A"
     fInicio: Mapped[date] = mapped_column(Date)       # Mapear "2025-10-01"
     fFin: Mapped[date] = mapped_column(Date)
+    
+    # Periodos de Exámenes
+    # Primer Parcial
+    primer_parcial_inicio: Mapped[Optional[date]] = mapped_column(Date, nullable=True)
+    primer_parcial_fin: Mapped[Optional[date]] = mapped_column(Date, nullable=True)
+    
+    # Segundo Parcial
+    segundo_parcial_inicio: Mapped[Optional[date]] = mapped_column(Date, nullable=True)
+    segundo_parcial_fin: Mapped[Optional[date]] = mapped_column(Date, nullable=True)
+    
+    # Tercer Parcial
+    tercer_parcial_inicio: Mapped[Optional[date]] = mapped_column(Date, nullable=True)
+    tercer_parcial_fin: Mapped[Optional[date]] = mapped_column(Date, nullable=True)
+    
+    # Ordinario
+    ordinario_inicio: Mapped[Optional[date]] = mapped_column(Date, nullable=True)
+    ordinario_fin: Mapped[Optional[date]] = mapped_column(Date, nullable=True)
+    
+    # Extraordinario
+    extraordinario_inicio: Mapped[Optional[date]] = mapped_column(Date, nullable=True)
+    extraordinario_fin: Mapped[Optional[date]] = mapped_column(Date, nullable=True)
 
     # Relación: Un periodo tiene muchos grupos
     grupos: Mapped[List["Grupo"]] = relationship(back_populates="periodo_rel")

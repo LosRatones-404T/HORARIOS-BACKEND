@@ -125,11 +125,15 @@ class Degree(Base):
 class ExamSpecifications(Base):
     __tablename__ = "exam_specifications"
 
-    id = Column(Integer, primary_key=True, index=True) # tal vez utilizar course_id como PK
+    id = Column(Integer, primary_key=True, index=True)
+    course_id = Column(Integer, ForeignKey("courses.id"), nullable=False, unique=True)  # Cada materia tiene una única especificación
     tipo_examen = Column(String, nullable=False)  # Ej: "parcial", "ordinario"
     duracion_minutos = Column(Integer, nullable=False)  # Duración del examen en minutos
     requiere_sala_computo = Column(Boolean, default=False)  # Si el examen requiere sala de cómputo
     periodo_actual = Column(String, nullable=False)  # Ej: "Enero 2024"
+    
+    # Relación con la materia/curso
+    course = relationship("Course", backref="exam_specifications")
 
 # Conflicto en generacion de horarios
 class ScheduleConflict(Base):
@@ -156,7 +160,25 @@ class PeriodosExamenes(Base):
     __tablename__ = "exam_periods"
 
     id = Column(Integer, primary_key=True, index=True)
-    nombre_periodo = Column(String, unique=True, nullable=False)  # Ej: "Enero 2024"
-    fecha_inicio = Column(Date, nullable=False)
-    fecha_fin = Column(Date, nullable=False)
+    nombre_periodo = Column(String, unique=True, nullable=False)  # Ej: "2024-A", "2024-B"
+    
+    # Primer Parcial
+    primer_parcial_inicio = Column(Date, nullable=True)
+    primer_parcial_fin = Column(Date, nullable=True)
+    
+    # Segundo Parcial
+    segundo_parcial_inicio = Column(Date, nullable=True)
+    segundo_parcial_fin = Column(Date, nullable=True)
+    
+    # Tercer Parcial
+    tercer_parcial_inicio = Column(Date, nullable=True)
+    tercer_parcial_fin = Column(Date, nullable=True)
+    
+    # Ordinario
+    ordinario_inicio = Column(Date, nullable=True)
+    ordinario_fin = Column(Date, nullable=True)
+    
+    # Extraordinario
+    extraordinario_inicio = Column(Date, nullable=True)
+    extraordinario_fin = Column(Date, nullable=True)
 

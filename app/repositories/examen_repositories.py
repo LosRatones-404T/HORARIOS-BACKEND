@@ -1,18 +1,10 @@
 from app.models import unsis
 import app.models.models as models
+from app.schemas.examen_schemas import ExamSpecCreate
 from sqlalchemy.orm import Session
 
-# obtener periodo actual de examenes
-def get_current_exam_period(db: Session):
-    # Obtener el periodo de exámenes más reciente
-    current_period = db.query(models.PeriodosExamenes).order_by(models.PeriodosExamenes.id.desc()).first()
-    if current_period:
-        return current_period.nombre_periodo
-    return None
 
-# obtener todas las carreras
-def get_all_degrees(db: Session):
-    return db.query(unsis.Carrera).all()
+
 
 # obtener examenes generados por periodo
 def get_exams_by_period(db: Session, period: str):
@@ -47,7 +39,7 @@ def get_exams_period(db: Session, period: str, exam_type: str):
 # obtener especificaciones de examen por curso
 def get_exam_especifications_by_course(db: Session, course_id: int):
     return db.query(models.ExamSpecifications).filter(
-        models.ExamSpecifications.id == course_id
+        models.ExamSpecifications.course_id == course_id
     ).first()
 
 
@@ -58,33 +50,37 @@ def save_exam(db: Session, exam: models.Exam):
     db.refresh(exam)
     return exam
 
+# guardar o actualizar especificaciones de examen
+def save_or_update_exam_specifications(db: Session, exam_spec: models.ExamSpecifications):
+    existing_spec = db.query(models.ExamSpecifications).filter(
+        models.ExamSpecifications.course_id == exam_spec.course_id
+    ).first()
+    if existing_spec:
+        # Actualizar los campos necesarios
+        existing_spec.tipo_examen = exam_spec.tipo_examen
+        existing_spec.duracion_minutos = exam_spec.duracion_minutos
+        existing_spec.requiere_sala_computo = exam_spec.requiere_sala_computo
+        existing_spec.periodo_actual = exam_spec.periodo_actual
+        db.commit()
+        db.refresh(existing_spec)
+        return existing_spec
+    else:
+        db.add(exam_spec)
+        db.commit()
+        db.refresh(exam_spec)
+        return exam_spec   
 
-# para otro repo de datos de unsis #################
-# otener cursos por carrera
-def get_courses_by_degree(db: Session, degree_id: str):
-    # TODO: devolver materias activas por carrera 
-    # return db.query(models.Course).filter(models.Course.degree_id == degree_id).all()
-    return []
 
-# obtener aulas
-def get_all_classrooms(db: Session):
-    return db.query(unsis.Aula).all()
 
-# obtener grupos por carrera
-def get_grupos_by_degree(db: Session, degree_id: str):
-    return db.query(unsis.Grupo).filter(unsis.Grupo.carrera_id == degree_id).all()
+def create_exam_spec(self, exam_data: ExamSpecCreate):
+        # Convertimos el esquema Pydantic a Modelo SQLAlchemy
+        # **exam_data.dict() desempaqueta los campos automáticamente
+        db_exam = models.ExamSpecifications(**exam_data.dict())
+        
+        self.db.add(db_exam)
+        self.db.commit()
+        self.db.refresh(db_exam) # Obtiene el ID generado por la BD
+        return db_exam
 
-# obtener grupos por carrera y semestre
-def get_grupos_by_degree_and_semester(db: Session, degree_id: str, semester: int):
-    return db.query(unsis.Grupo).filter(
-        unsis.Grupo.carrera_id == degree_id,
-        unsis.Grupo.semestre == semester
-    ).all()
-
-# obtener periodo actual de unsis
-def get_current_unsis_period(db: Session):
-    current_period = db.query(unsis.Periodo).order_by(unsis.Periodo.id.desc()).first()
-    if current_period:
-        return current_period.clave
-    return None
-
+def get_by_materia(self, materia_id: str):
+    return self.db.query(models.ExamSpecifications).filter(models.ExamSpecifications.materia_id == materia_id).all()

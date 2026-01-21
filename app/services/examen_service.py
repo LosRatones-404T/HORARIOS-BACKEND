@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Session
 from app.models import models
-from app.repositories.examen_repositories import get_courses_by_degree, get_all_classrooms, save_exam, get_exams_by_period, get_exams_period, get_exam_especifications_by_course, get_current_exam_period
+from app.repositories.examen_repositories import get_courses_by_degree, get_all_classrooms, save_exam, get_exams_by_period, get_exams_period, get_exam_especifications_by_course, get_current_exam_period, get_all_degrees, save_or_update_exam_specifications
 
 def generate_exam_for_course(db: Session, id: str):
     # Lógica para generar un examen para un curso específico
@@ -81,3 +81,7 @@ def fill_exam_report(exam_id: str):
     reporte = models.GeneratedExamReport
     reporte.exam_id = exam_id
     
+# def definir_preferencias_examen
+def definir_preferencias_examen(course_id: str, preferences: dict):
+    save_or_update_exam_specifications(course_id, preferences)
+    pass  # Lógica para definir las preferencias del examen para un curso específico
