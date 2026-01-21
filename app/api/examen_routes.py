@@ -5,6 +5,7 @@ from app.core.conexion import get_db
 from app.models import models
 
 from app.schemas.examen_schemas import ExamResponse, MessageResponse, ExamSpecCreate, ExamSpecResponse
+from app.services.examen_service import generate_exam_schedule_degree
 
 router = APIRouter(
     prefix="/examenes", 
@@ -39,7 +40,6 @@ def get_exams_by_period(period: str, db: Session = Depends(get_db)):
     """
     Retorna la lista de exámenes agendados para un periodo específico.
     """
-    from app.repositories.examen_repositories import get_exams_by_period
 
     exams = get_exams_by_period(db, period)
     
@@ -61,11 +61,10 @@ def get_exams_by_period(period: str, db: Session = Depends(get_db)):
 
 # generar examenes para una carrera
 @router.post("/generate-schedule/{degree_id}", response_model=MessageResponse)
-def generate_exam_schedule(degree_id: int, db: Session = Depends(get_db)):
+def generate_exam_schedule(degree_id: str, db: Session = Depends(get_db)):
     """
     Genera el calendario de exámenes para una carrera específica.
     """
-    from app.services.examen_service import generate_exam_schedule_degree
 
     exams_created = generate_exam_schedule_degree(db, degree_id)
 

@@ -6,6 +6,7 @@ from sqlalchemy.orm import Session
 
 
 
+
 # obtener examenes generados por periodo
 def get_exams_by_period(db: Session, period: str):
     # Buscar exámenes que tengan especificaciones con el periodo especificado
@@ -84,3 +85,11 @@ def create_exam_spec(self, exam_data: ExamSpecCreate):
 
 def get_by_materia(self, materia_id: str):
     return self.db.query(models.ExamSpecifications).filter(models.ExamSpecifications.materia_id == materia_id).all()
+
+# obtener periodo actual de examenes, primer parcial, segundo parcial, ordinario
+def get_current_exam_period(db: Session):
+    # Obtener el periodo de exámenes más reciente
+    current_period = db.query(models.PeriodosExamenes).order_by(models.PeriodosExamenes.id.desc()).first()
+    if current_period:
+        return current_period.nombre_periodo
+    return None

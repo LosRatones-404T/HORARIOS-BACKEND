@@ -2,7 +2,7 @@ from pydantic import BaseModel
 from datetime import date, time
 
 class ExamResponse(BaseModel):
-    id: int
+    id: int          # ID del examen
     course: str      # Nombre de la materia
     group: str       # Grupo (ej. 106-A)
     professor: str   # Nombre del profe
