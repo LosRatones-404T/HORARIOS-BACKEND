@@ -3,71 +3,47 @@ from sqlalchemy.orm import relationship
 from app.core.conexion import Base
 
 
-# 1. Modelo de Aula (Ya lo tenías, lo dejo por referencia)
 class Classroom(Base):
     __tablename__ = "classrooms"
     
     id = Column(Integer, primary_key=True, index=True)
-    name = Column(String, unique=True, index=True) # Ej: "F3", "CETI-S.O."
+    name = Column(String, unique=True, index=True)
     capacity = Column(Integer, default=30)
-    is_computer_lab = Column(Boolean, default=False) # Para saber si es sala de cómputo
+    is_computer_lab = Column(Boolean, default=False)
     
 
 
-# 2. Modelo de Profesor
 class Professor(Base):
     __tablename__ = "professors"
     
     id = Column(Integer, primary_key=True, index=True)
     full_name = Column(String, index=True, nullable=False)
-    # ID externo por si sincronizas con otro sistema de la universidad
     external_id = Column(String, unique=True, nullable=True) 
 
 
-# 3. Modelo de Materia (EL NÚCLEO)
 class Course(Base):
     __tablename__ = "courses"
     
     id = Column(Integer, primary_key=True, index=True)
-    
-    # Datos Básicos
-    name = Column(String, index=True, nullable=False)       # Ej: "Cálculo I"
-    group_name = Column(String, index=True, nullable=False) # Ej: "106-A"
-    semester = Column(Integer, nullable=False)               # Ej: 1, 3, 5 (Opcional, útil para filtrar)
-    
-    # Relaciones (Foreign Keys)
+    name = Column(String, index=True, nullable=False)
+    group_name = Column(String, index=True, nullable=False)
+    semester = Column(Integer, nullable=False)
     professor_id = Column(Integer, ForeignKey("professors.id"))
-    
-    # CLAVE PARA TU REQUERIMIENTO:
-    # Si "Matemáticas 104A" y "Matemáticas 104B" deben presentar juntas,
-    # ambas deben tener el mismo número aquí (ej: 100).
-    # El algoritmo buscará materias con el mismo cluster_id para agendarlas igual.
     cluster_id = Column(Integer, nullable=True, index=True)
 
-    # Definición de Relaciones para SQLAlchemy
     professor = relationship("Professor", backref="courses")
-    
-    # Una materia tiene MUCHOS horarios de clase (Lunes 9am, Miercoles 11am...)
-    # cascade="all, delete-orphan" significa que si borras la materia, se borran sus horarios.
     regular_schedules = relationship("RegularSchedule", back_populates="course", cascade="all, delete-orphan")
-    
-    # Una materia tiene UN solo examen final/parcial agendado
     exam = relationship("Exam", uselist=False, back_populates="course")
 
 
-# 4. Horarios Habituales (Para la preferencia de horario)
 class RegularSchedule(Base):
     __tablename__ = "regular_schedules"
     
     id = Column(Integer, primary_key=True, index=True)
     course_id = Column(Integer, ForeignKey("courses.id"))
-    
-    day_of_week = Column(Integer) # 0=Lunes, 1=Martes... 6=Domingo
-    start_time = Column(Time)     # Ej: 09:00:00
-    end_time = Column(Time)       # Ej: 10:00:00
-    
-    # Opcional: Si se quiere recordar en qué aula toman clase normalmente
-    # classroom_id = Column(Integer, ForeignKey("classrooms.id"), nullable=True) 
+    day_of_week = Column(Integer)
+    start_time = Column(Time)
+    end_time = Column(Time)
     
     course = relationship("Course", back_populates="regular_schedules")
 
@@ -84,30 +60,22 @@ class User(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
 
-# 5. El Examen Generado
 class Exam(Base):
     __tablename__ = "examens"
     
     id = Column(Integer, primary_key=True, index=True)
-    
-    # Relaciones
     course_id = Column(Integer, ForeignKey("courses.id"), unique=True)
     classroom_id = Column(Integer, ForeignKey("classrooms.id"))
-    
-    # Datos del Examen
     exam_date = Column(Date)
     start_time = Column(Time)
     end_time = Column(Time)
-
-    examen_type = Column(String, nullable=False, default="parcial") # "ordinario" o "parcial"
-
-    is_active = Column(Boolean, default=False) # generar función si el examen esta activo o no, lo revisa en base al exameen date y startr
+    examen_type = Column(String, nullable=False, default="parcial")
+    is_active = Column(Boolean, default=False)
     
     examen_time_generated = Column(DateTime(timezone=True))
     
-    # Fixed: Added FK for user relationship
     generated_by_id = Column(Integer, ForeignKey("users.id"), nullable=True)
-    examen_generated_by = relationship("User", foreign_keys=[generated_by_id])  # Usuario que generó el examen
+    examen_generated_by = relationship("User", foreign_keys=[generated_by_id])
     
     course = relationship("Course", back_populates="exam")
     classroom = relationship("Classroom")
@@ -116,45 +84,44 @@ class Exam(Base):
 class Degree(Base):
     __tablename__ = "degrees"
 
-    id = Column(Integer, primary_key=True, index=True)
+    id = Column(String, primary_key=True, index=True)
     name = Column(String, unique=True, index=True, nullable=False)
     jefe_carrera = Column(String, nullable=True)
+    jefe_carrera_user_id = Column(Integer, ForeignKey("users.id"), unique=True, nullable=True)
     is_active = Column(Boolean, default=True)
+    
+    jefe_carrera_user = relationship("User", backref="degree_managed", foreign_keys=[jefe_carrera_user_id])
 
-# Especificaciones para examen
 class ExamSpecifications(Base):
     __tablename__ = "exam_specifications"
 
     id = Column(Integer, primary_key=True, index=True)
-    course_id = Column(Integer, ForeignKey("courses.id"), nullable=False, unique=True)  # Cada materia tiene una única especificación
-    tipo_examen = Column(String, nullable=False)  # Ej: "parcial", "ordinario"
-    duracion_minutos = Column(Integer, nullable=False)  # Duración del examen en minutos
-    requiere_sala_computo = Column(Boolean, default=False)  # Si el examen requiere sala de cómputo
-    periodo_actual = Column(String, nullable=False)  # Ej: "Enero 2024"
+    course_id = Column(Integer, ForeignKey("courses.id"), nullable=False, unique=True)
+    tipo_examen = Column(String, nullable=False)
+    duracion_minutos = Column(Integer, nullable=False)
+    requiere_sala_computo = Column(Boolean, default=False)
+    periodo_actual = Column(String, nullable=False)
     
-    # Relación con la materia/curso
     course = relationship("Course", backref="exam_specifications")
 
-# Conflicto en generacion de horarios
 class ScheduleConflict(Base):
     __tablename__ = "schedule_conflicts"
 
     id = Column(Integer, primary_key=True, index=True)
     course_id_1 = Column(Integer, ForeignKey("courses.id"), nullable=False)
     course_id_2 = Column(Integer, ForeignKey("courses.id"), nullable=False)
-    reason = Column(String, nullable=True)  # Razón del conflicto
+    reason = Column(String, nullable=True)
 
-# Informe de examen generado
 class GeneratedExamReport(Base):
     __tablename__ = "generated_exam_reports"
 
     id = Column(Integer, primary_key=True, index=True)
     course_id = Column(Integer, ForeignKey("courses.id"), nullable=False)
     exam_id = Column(Integer, ForeignKey("examens.id"), nullable=False)
-    status = Column(String, nullable=False)  # Ej: "created", "conflict"
-    same_aula = Column(Boolean, default=False)  # Si se logró mantener el mismo aula
-    same_time = Column(Boolean, default=False)  # Si se logró mantener el mismo horario que clase regular
-    details = Column(String, nullable=True)  # Detalles adicionales sobre la generación
+    status = Column(String, nullable=False)
+    same_aula = Column(Boolean, default=False)
+    same_time = Column(Boolean, default=False)
+    details = Column(String, nullable=True)
 
 class PeriodosExamenes(Base):
     __tablename__ = "exam_periods"

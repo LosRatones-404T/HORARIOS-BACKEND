@@ -5,7 +5,15 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 from app.schemas.user_schemas import UserCreate, UserRead, Token
-from app.services.user_service import change_user_email, update_user_password, toggle_user_active_status, get_all_users, change_user_role
+from app.services.user_service import (
+    change_user_email, 
+    update_user_password, 
+    toggle_user_active_status, 
+    get_all_users, 
+    change_user_role,
+    get_jefes_carrera,
+    get_degree_managed_by_user
+)
 from app.dependencies import get_db
 from app.core.security import get_current_user
 
@@ -66,3 +74,31 @@ def change_email(username: str, new_email: str, db: Session = Depends(get_db), c
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
     return user
+
+# obtener todos los jefes de carrera
+@router.get("/jefes-carrera", response_model=list[UserRead])
+def get_jefes_carrera_route(db: Session = Depends(get_db), current_user=Depends(get_current_user)):
+    """
+    Obtiene todos los usuarios con rol JEFE_CARRERA.
+    """
+    jefes = get_jefes_carrera(db)
+    return jefes
+
+# obtener carrera gestionada por el usuario actual
+@router.get("/me/degree")
+def get_my_degree(db: Session = Depends(get_db), current_user=Depends(get_current_user)):
+    """
+    Obtiene la carrera gestionada por el usuario actual (solo JEFE_CARRERA).
+    """
+    if current_user.role != "JEFE_CARRERA":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Solo los jefes de carrera pueden consultar su carrera"
+        )
+    
+    degree = get_degree_managed_by_user(db, current_user.id)
+    if not degree:
+        return {"message": "No tienes una carrera asignada"}
+    
+    from app.schemas.degree_schemas import DegreeRead
+    return DegreeRead.model_validate(degree)

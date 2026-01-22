@@ -80,7 +80,8 @@ def generate_exam_schedule_degree(db: Session, degree_id: str):
     return exams_created
 
 
-def classroom_available(exam_date, start_time, end_time, classroom_id):
+def classroom_available(db: Session, exam_date, start_time, end_time, classroom_id):
+    
     pass  # Lógica para verificar si un aula está disponible en una fecha y hora específicas
 
 def obtener_time_exam(course_id, exam_especifications, exams): #Si si se le asigna un horario al examen y se cambia en especifications, preferible horario de clase regular, asigna dia y hora, solo un examen por día

@@ -10,6 +10,16 @@ class RoleEnum(str, Enum):
     SECRETARIA = "SECRETARIA"
 
 
+class DegreeInfo(BaseModel):
+    """Información básica de la carrera"""
+    model_config = ConfigDict(from_attributes=True)
+    
+    id: int
+    name: str
+    jefe_carrera: Optional[str] = None
+    is_active: bool
+
+
 class UserCreate(BaseModel):
     username: str = "admin"
     email: Optional[EmailStr] = "j.lopezlopez1004@gmail.com"

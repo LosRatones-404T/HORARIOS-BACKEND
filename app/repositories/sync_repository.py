@@ -7,17 +7,13 @@ class SyncRepository:
         self.db = db
 
     def upsert_carrera(self, data: dict):
-        # Buscamos si existe por clave
         obj = self.db.query(Carrera).filter(Carrera.clave == data["clave"]).first()
         if obj:
-            # Actualizamos campos
             for key, value in data.items():
                 setattr(obj, key, value)
         else:
-            # Creamos nuevo
             obj = Carrera(**data)
             self.db.add(obj)
-        # No hacemos commit aquí para poder hacer rollback si algo falla en lote
         return obj
 
     def upsert_periodo(self, data: dict):

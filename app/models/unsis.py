@@ -54,12 +54,10 @@ class Periodo(Base):
 class Aula(Base):
     __tablename__ = "aulas"
 
-    clave: Mapped[str] = mapped_column(String(10), primary_key=True) # Ej: "1", "95"
-    nombre: Mapped[str] = mapped_column(String(50))   # Ej: "A1", "LAB INFO"
+    clave: Mapped[str] = mapped_column(String(10), primary_key=True)
+    nombre: Mapped[str] = mapped_column(String(50))
     capacidad: Mapped[int] = mapped_column(Integer)
-    tipo: Mapped[str] = mapped_column(String(50))     # Ej: "AULA", "LABORATORIO"
-    
-    # Puede ser nulo según tu JSON (null, "", "SI", "NO_FUNCIONA")
+    tipo: Mapped[str] = mapped_column(String(50))
     statusProyector: Mapped[Optional[str]] = mapped_column(String(50), nullable=True)
 
 # 4. Modelo de Grupos (grupos.json)

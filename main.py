@@ -121,3 +121,7 @@ app.include_router(unsis_router)
 # importar y registrar el router de usuarios
 from app.api.users_routes import router as users_router
 app.include_router(users_router)
+
+# importar y registrar el router de carreras
+from app.api.degree_routes import router as degree_router
+app.include_router(degree_router)

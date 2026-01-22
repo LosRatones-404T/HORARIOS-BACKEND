@@ -105,3 +105,56 @@ def get_professors_by_subject(db: Session, subject_id: str):
     ).distinct().all()
 
 # obtener periodo actual de examenes
+
+# buscar una aula disponible en una fecha y hora específicas
+def classroom_available(db: Session, exam_date, start_time, end_time, required_capacity: int = 0, is_computer_lab: bool = False):
+    """
+    Busca un aula disponible en una fecha y hora específicas.
+    
+    Args:
+        db: Sesión de base de datos
+        exam_date: Fecha del examen (date)
+        start_time: Hora de inicio (time)
+        end_time: Hora de fin (time)
+        required_capacity: Capacidad mínima requerida (opcional)
+        is_computer_lab: Si se requiere sala de cómputo (opcional)
+        
+    Returns:
+        str: ID del aula disponible o None si no hay aulas disponibles
+    """
+    from datetime import datetime, time
+    
+    # Obtener todas las aulas que cumplen con los requisitos básicos
+    query = db.query(unsis.Aula)
+    
+    if required_capacity > 0:
+        query = query.filter(unsis.Aula.capacidad >= required_capacity)
+    
+    if is_computer_lab:
+        query = query.filter(unsis.Aula.tipo.in_(["LABORATORIO", "SALA DE COMPUTO"]))
+    
+    available_classrooms = query.all()
+    
+    if not available_classrooms:
+        return None
+    
+    # Verificar qué aulas no tienen exámenes en ese horario
+    for classroom in available_classrooms:
+        # Verificar si hay un examen programado en esa aula en esa fecha y hora
+        conflicting_exam = db.query(models.Exam).join(
+            models.Classroom, models.Exam.classroom_id == models.Classroom.id
+        ).filter(
+            models.Classroom.name == classroom.nombre,
+            models.Exam.exam_date == exam_date,
+            models.Exam.start_time < end_time,
+            models.Exam.end_time > start_time
+        ).first()
+        
+        if not conflicting_exam:
+            # Esta aula está disponible
+            return classroom.clave
+    
+    # No hay aulas disponibles en ese horario
+    return None
+    
+    

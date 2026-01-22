@@ -93,3 +93,4 @@ def get_current_exam_period(db: Session):
     if current_period:
         return current_period.nombre_periodo
     return None
+

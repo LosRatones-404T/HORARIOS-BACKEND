@@ -61,3 +61,11 @@ def change_user_email(db: Session, username: str, new_email: str) -> models.User
         db.refresh(user)
         return user
     return None
+
+# obtener carrera que gestiona un usuario (si es jefe de carrera)
+def get_degree_managed_by_user(db: Session, user_id: int) -> models.Degree | None:
+    return db.query(models.Degree).filter(models.Degree.jefe_carrera_user_id == user_id).first()
+
+# obtener jefes de carrera
+def get_jefes_carrera(db: Session) -> list[models.User]:
+    return db.query(models.User).filter(models.User.role == "JEFE_CARRERA").all()

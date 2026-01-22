@@ -52,10 +52,6 @@ def test_connection():
 
 # Dependency generator para FastAPI: abrir y cerrar sesiones correctamente
 def get_db():
-    """Yield a database session and ensure it is closed after use.
-
-    Use in routes as: db: Session = Depends(get_db)
-    """
     db = SessionLocal()
     try:
         yield db

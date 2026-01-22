@@ -39,3 +39,9 @@ def toggle_user_active_status(db: Session, username: str):
 
 def change_user_email(db: Session, username: str, new_email: str):
     return user_repository.change_user_email(db, username, new_email)
+
+def get_degree_managed_by_user(db: Session, user_id: int):
+    return user_repository.get_degree_managed_by_user(db, user_id)
+
+def get_jefes_carrera(db: Session):
+    return user_repository.get_jefes_carrera(db)
