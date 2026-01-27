@@ -9,7 +9,8 @@ class SyncService:
     def __init__(self, db: Session):
         self.repo = SyncRepository(db)
         # Usar variable de entorno, con fallback a host.docker.internal para Docker
-        self.base_url = os.getenv("EXTERNAL_API_URL", "http://host.docker.internal:3000/api")
+        # self.base_url = os.getenv("EXTERNAL_API_URL", "http://host.docker.internal:3000/api")
+        self.base_url = os.getenv("EXTERNAL_API_URL", "http://10.42.0.152:3000/api")
 
     def sync_all(self):
         try:
