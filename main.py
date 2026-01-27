@@ -6,6 +6,11 @@ from app.core.conexion import test_connection, create_tables
 from app.api import examen_routes
 from app.api.auth_routes import router as auth_router
 import app.models.models as models # Asegura que los modelos se registren
+import logging
+
+# Configurar nivel de logging
+logging.getLogger("uvicorn").setLevel(logging.WARNING)
+logging.getLogger("uvicorn.access").setLevel(logging.WARNING)
 
 # importar sesión para crear usuario inicial
 from app.core.conexion import SessionLocal

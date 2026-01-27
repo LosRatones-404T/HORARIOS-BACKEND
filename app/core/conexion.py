@@ -3,6 +3,10 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 import os
 from dotenv import load_dotenv
+import logging
+
+# Desactivar logs de SQLAlchemy
+logging.getLogger('sqlalchemy.engine').setLevel(logging.WARNING)
 
 # Cargar variables de entorno
 load_dotenv()
@@ -13,7 +17,7 @@ DATABASE_URL = os.getenv("DATABASE_URL")
 # Crear el motor de SQLAlchemy
 engine = create_engine(
     DATABASE_URL,
-    echo=True,  # Muestra las consultas SQL en consola (útil para desarrollo)
+    echo=False,  # No mostrar las consultas SQL en consola
     pool_pre_ping=True,  # Verifica la conexión antes de usarla
     pool_size=5,  # Número de conexiones en el pool
     max_overflow=10  # Conexiones adicionales si se necesitan
