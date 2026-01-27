@@ -1,6 +1,7 @@
 from datetime import timedelta
 from re import U
 from urllib import response
+from app.repositories.user_repository import delete_user
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
@@ -102,3 +103,14 @@ def get_my_degree(db: Session = Depends(get_db), current_user=Depends(get_curren
     
     from app.schemas.degree_schemas import DegreeRead
     return DegreeRead.model_validate(degree)
+
+# borrar usuario especificado
+@router.delete("/{username}", response_model=UserRead)
+def delete_user_route(username: str, db: Session = Depends(get_db)):
+    """
+    Borra el usuario especificado.
+    """
+    user = delete_user(db, username)
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    return user

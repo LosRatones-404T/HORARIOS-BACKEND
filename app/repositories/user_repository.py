@@ -69,3 +69,13 @@ def get_degree_managed_by_user(db: Session, user_id: int) -> models.Degree | Non
 # obtener jefes de carrera
 def get_jefes_carrera(db: Session) -> list[models.User]:
     return db.query(models.User).filter(models.User.role == "JEFE_CARRERA").all()
+
+# borrar usuario
+def delete_user(db: Session, username: str):
+    user = get_user_by_username(db, username)
+    if user:
+        db.delete(user)
+        db.commit()
+        return user
+    else:
+        return None
