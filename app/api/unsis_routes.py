@@ -1,4 +1,4 @@
-from app.schemas.unsis_schemas import GrupoResponse, AulaResponse, CarreraResponse, PeriodoExamenResponse, MateriaResponse, HorarioResponse, ProfesorResponse, MateriaResponse
+from app.schemas.unsis_schemas import GrupoResponse, AulaResponse, CarreraResponse, PeriodoExamenResponse, MateriaResponse, HorarioResponse, PeriodoResponse, ProfesorResponse, MateriaResponse
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from typing import List
@@ -15,20 +15,20 @@ router = APIRouter(
     tags=["unsis"]
 )
 
-# obtener periodo aun en proceso de correción
-@router.get("/current-period", response_model=PeriodoExamenResponse)
+# obtener periodo actual de unsis (semestre actual)
+@router.get("/current-period", response_model=PeriodoResponse)
 def get_current_exam_period(db: Session = Depends(get_db)):
     """
     Retorna el periodo actual de exámenes en formato JSON estándar.
     """
-    current_period = db.query(models.PeriodosExamenes).order_by(models.PeriodosExamenes.id.desc()).first()
+    current_period = unsis_repository.get_current_unsis_period(db)
 
     if not current_period:
         raise HTTPException(status_code=404, detail="No se encontró un periodo de exámenes activo.")
 
     return current_period
 
-# obtener carreraas activas
+# obtener carreras activas
 @router.get("/degrees", response_model=List[CarreraResponse])
 def get_active_degrees(db: Session = Depends(get_db)):
     """

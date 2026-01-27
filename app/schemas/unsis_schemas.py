@@ -1,3 +1,4 @@
+from datetime import date
 from pydantic import BaseModel
 from typing import Optional
 # Este es el molde de cómo se verá el JSON de cada grupo
@@ -38,34 +39,38 @@ class PeriodoResponse(BaseModel):
     clave: str
     nombre: str
     tipo: str
-    fInicio: str
-    fFin: str
+    fInicio: date
+    fFin: date
     
     # Periodos de Exámenes
     # Primer Parcial
-    primer_parcial_inicio: Optional[str] = None
-    primer_parcial_fin: Optional[str] = None
+    primer_parcial_inicio: Optional[date] = None
+    primer_parcial_fin: Optional[date] = None
     
     # Segundo Parcial
-    segundo_parcial_inicio: Optional[str] = None
-    segundo_parcial_fin: Optional[str] = None
+    segundo_parcial_inicio: Optional[date] = None
+    segundo_parcial_fin: Optional[date] = None
     
     # Tercer Parcial
-    tercer_parcial_inicio: Optional[str] = None
-    tercer_parcial_fin: Optional[str] = None
+    tercer_parcial_inicio: Optional[date] = None
+    tercer_parcial_fin: Optional[date] = None
     
     # Ordinario
-    ordinario_inicio: Optional[str] = None
-    ordinario_fin: Optional[str] = None
+    ordinario_inicio: Optional[date] = None
+    ordinario_fin: Optional[date] = None
     
     # Extraordinario
-    extraordinario_inicio: Optional[str] = None
-    extraordinario_fin: Optional[str] = None
+    extra1_inicio: Optional[date] = None
+    extra1_fin: Optional[date] = None
+
+    # Extraordinario 2
+    extra2_inicio: Optional[date] = None
+    extra2_fin: Optional[date] = None
 
     class Config:
         from_attributes = True
 
-# Mantener PeriodoExamenResponse para compatibilidad con endpoint /current-period
+# # Mantener PeriodoExamenResponse para compatibilidad con endpoint /current-period
 class PeriodoExamenResponse(BaseModel):
     id: int
     nombre_periodo: str
