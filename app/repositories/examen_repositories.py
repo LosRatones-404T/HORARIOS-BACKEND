@@ -180,3 +180,17 @@ def get_exam_periods_dates(db: Session):
     }
 
 #######################
+
+
+# eliminar todos los examenes (para pruebas)
+def delete_all_exams(db: Session):
+    db.query(models.Exam).delete()
+    db.commit()
+
+# insertar especificaciones de examen
+def insert_exam_specifications(db: Session, exam_spec: models.ExamSpecification):
+    db.add(exam_spec)
+    db.commit()
+    db.refresh(exam_spec)
+    return exam_spec
+

@@ -114,3 +114,10 @@ def get_materias_by_carrera(degree_id: str, db: Session = Depends(get_db)):
     ).distinct().all()
     
     return [{"id": m.id, "nombre": m.nombre} for m in materias]
+
+# eliminar todos los examenes (para pruebas)
+@router.delete("/delete-all", response_model=MessageResponse)
+def delete_all_exams_route(db: Session = Depends(get_db)):
+    """Eliminar todos los exámenes (solo para pruebas)"""
+    examen_repositories.delete_all_exams(db)
+    return {"message": "Todos los exámenes han sido eliminados."}
