@@ -1,3 +1,4 @@
+from email.policy import default
 from sqlalchemy import Column, Text, Integer, String, Boolean, ForeignKey, Date, Time, DateTime, func
 from sqlalchemy.orm import relationship
 from app.core.conexion import Base
@@ -38,15 +39,15 @@ class Exam(Base):
 class ExamSpecification(Base):
     __tablename__ = "exam_specifications"
     
-    id = Column(Integer, primary_key=True, index=True)
-    materia_id = Column(String, nullable=False)
-    grupo_id = Column(String, nullable=True)
-    tipo_examen = Column(String, nullable=False)
-    tipo_aplicacion = Column(String, nullable=False, default="ESCRITO")
+    id = Column(Integer, primary_key=True, index=True,default=0)
+    materia_id = Column(String, nullable=False, default="")
+    grupo_id = Column(String, nullable=True, default="")
+    tipo_examen = Column(String, nullable=False, default="PRIMER_PARCIAL")
+    tipo_aplicacion = Column(String, nullable=False, default="ESCRITO") # COMPUTADORA O ESCRITO
     es_academia = Column(Boolean, default=False)
-    profesor_aplicador_id = Column(String, nullable=True)
+    profesor_aplicador_id = Column(String, nullable=True) # MISMO QUE IMPARTE LA MATERIA
     duracion_minutos = Column(Integer, default=120)
-    preferencia_aula_id = Column(String, nullable=True)
+    preferencia_aula_id = Column(String, nullable=True) # MISMA QUE CLASE NORMAL
     notas = Column(Text, nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())

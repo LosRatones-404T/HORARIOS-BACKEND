@@ -20,6 +20,18 @@ def register_user(db: Session, user: UserCreate) -> User:
     
     return user_repository.create_user(db, user.username, user.email, user.password, user.role)
 
+def register_user_jefe(db: Session, user: UserCreate) -> User:
+    """Registra un nuevo usuario Jefe de Carrera"""
+    existing_user = user_repository.get_user_by_username(db, user.username)
+    if existing_user:
+        raise ValueError("El nombre de usuario ya está en uso")
+    
+    existing_email = user_repository.get_user_by_email(db, user.email)
+    if existing_email:
+        raise ValueError("El email ya está en uso")
+    
+    return user_repository.create_user(db, user.username, user.email, user.password, user.role)
+
 
 def authenticate_user(db: Session, username: str, password: str) -> Optional[User]:
     """Autentica un usuario verificando sus credenciales"""

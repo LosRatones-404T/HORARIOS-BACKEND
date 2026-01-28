@@ -1,7 +1,8 @@
 from datetime import timedelta
-from re import U
+from re import M, U
 from urllib import response
 from app.repositories.user_repository import delete_user
+from app.schemas.examen_schemas import MessageResponse
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
@@ -85,7 +86,7 @@ def get_jefes_carrera_route(db: Session = Depends(get_db), current_user=Depends(
     return jefes
 
 # borrar usuario especificado
-@router.delete("/{username}", response_model=UserRead)
+@router.delete("/{username}", response_model=MessageResponse)
 def delete_user_route(username: str, db: Session = Depends(get_db)):
     """
     Borra el usuario especificado.
@@ -93,4 +94,4 @@ def delete_user_route(username: str, db: Session = Depends(get_db)):
     user = delete_user(db, username)
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
-    return user
+    return {"message": "User deleted successfully"}

@@ -57,15 +57,14 @@ def update_user(db: Session, user_id: int, **kwargs) -> Optional[models.User]:
     return user
 
 
-def delete_user(db: Session, user_id: int) -> bool:
-    """Elimina un usuario (soft delete)"""
-    user = get_user_by_id(db, user_id)
-    if not user:
-        return False
+def delete_user(db: Session, username: str) -> Optional[models.User]:
+    """Elimina un usuario por su nombre de usuario"""
+    user = get_user_by_username(db, username)
+    if user:
+        db.delete(user)
+        db.commit()
+        return user
     
-    user.is_active = False
-    db.commit()
-    return True
 
 
 # ELIMINAR O COMENTAR ESTA FUNCIÓN - Ya no existe Degree

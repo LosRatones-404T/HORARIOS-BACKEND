@@ -26,6 +26,13 @@ class UserCreate(BaseModel):
     password: str = "admin123" 
     role: RoleEnum = RoleEnum.ADMIN
 
+class UserCreateJefe(BaseModel):
+    username: str = "INFORMATICA"
+    email: Optional[EmailStr] = "informatica@unsis.edu.mx"
+    password: str = "info123" 
+    role: RoleEnum = RoleEnum.JEFE_CARRERA
+    carrera: str = "06B"
+
 
 class UserRead(BaseModel):
     model_config = ConfigDict(from_attributes=True)
