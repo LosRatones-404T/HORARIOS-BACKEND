@@ -1,5 +1,6 @@
 # from app.schemas.unsis_schemas import GrupoResponse, AulaResponse, CarreraResponse, PeriodoExamenResponse, MateriaResponse, HorarioResponse, PeriodoResponse, ProfesorResponse, MateriaResponse
 from app.schemas import unsis_schemas
+from app.services import unsis_service
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from typing import List
@@ -35,10 +36,7 @@ def update_current_unsis_period(period: unsis_schemas.PeriodoResponse, db: Sessi
     """
     Insertar o actualizar las fechas de parciales del periodo actual.
     """
-    updated_period = unsis_repository.update_current_period(db, period)
-    if not updated_period:
-        raise HTTPException(status_code=404, detail="No se pudo actualizar el periodo actual.")
-    return updated_period
+    return unsis_service.update_current_period(db, period)
 
 # obtener carreras activas
 @router.get("/degrees", response_model=List[unsis_schemas.CarreraResponse])
