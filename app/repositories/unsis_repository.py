@@ -1,6 +1,7 @@
 from app.models import unsis
 import app.models.models as models
 from app.schemas.examen_schemas import ExamSpecCreate
+from app.schemas.unsis_schemas import PeriodoResponse
 from sqlalchemy.orm import Session
 
 # otener cursos por carrera
@@ -104,4 +105,26 @@ def get_professors_by_subject(db: Session, subject_id: str):
         unsis.Horario.materia_id == subject_id
     ).distinct().all()
 
-# obtener periodo actual de examenes
+# insertar fechas de parciales de periodo actual
+def update_current_period(db: Session, period_update: PeriodoResponse):
+    current_period = get_current_unsis_period(db)
+    if not current_period:
+        return None
+    # Actualizar las fechas
+    current_period.primer_parcial_inicio = period_update.primer_parcial_inicio
+    current_period.primer_parcial_fin = period_update.primer_parcial_fin
+    current_period.segundo_parcial_inicio = period_update.segundo_parcial_inicio
+    current_period.segundo_parcial_fin = period_update.segundo_parcial_fin
+    current_period.tercer_parcial_inicio = period_update.tercer_parcial_inicio
+    current_period.tercer_parcial_fin = period_update.tercer_parcial_fin
+    current_period.ordinario_inicio = period_update.ordinario_inicio
+    current_period.ordinario_fin = period_update.ordinario_fin
+    current_period.extra1_inicio = period_update.extra1_inicio
+    current_period.extra1_fin = period_update.extra1_fin
+    current_period.extra2_inicio = period_update.extra2_inicio
+    current_period.extra2_fin = period_update.extra2_fin   
+    current_period.especial_inicio = period_update.especial_inicio
+    current_period.especial_fin = period_update.especial_fin
+    db.commit()
+    db.refresh(current_period)
+    return current_period 

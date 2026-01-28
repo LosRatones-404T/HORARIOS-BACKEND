@@ -44,12 +44,16 @@ class Periodo(Base):
     ordinario_fin: Mapped[Optional[date]] = mapped_column(Date, nullable=True)
     
     # Extraordinario
-    extraordinario_inicio: Mapped[Optional[date]] = mapped_column(Date, nullable=True)
-    extraordinario_fin: Mapped[Optional[date]] = mapped_column(Date, nullable=True)
+    extra1_inicio: Mapped[Optional[date]] = mapped_column(Date, nullable=True)
+    extra1_fin: Mapped[Optional[date]] = mapped_column(Date, nullable=True)
 
     # Extraordinario 2
-    extraordinario2_inicio: Mapped[Optional[date]] = mapped_column(Date, nullable=True)
-    extraordinario2_fin: Mapped[Optional[date]] = mapped_column(Date, nullable=True)
+    extra2_inicio: Mapped[Optional[date]] = mapped_column(Date, nullable=True)
+    extra2_fin: Mapped[Optional[date]] = mapped_column(Date, nullable=True)
+
+    # Especial 
+    especial_inicio: Mapped[Optional[date]] = mapped_column(Date, nullable=True)
+    especial_fin: Mapped[Optional[date]] = mapped_column(Date, nullable=True)
 
     # Relación: Un periodo tiene muchos grupos
     grupos: Mapped[List["Grupo"]] = relationship(back_populates="periodo_rel")

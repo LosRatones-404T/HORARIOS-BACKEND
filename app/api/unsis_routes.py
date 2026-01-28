@@ -1,4 +1,5 @@
-from app.schemas.unsis_schemas import GrupoResponse, AulaResponse, CarreraResponse, PeriodoExamenResponse, MateriaResponse, HorarioResponse, PeriodoResponse, ProfesorResponse, MateriaResponse
+# from app.schemas.unsis_schemas import GrupoResponse, AulaResponse, CarreraResponse, PeriodoExamenResponse, MateriaResponse, HorarioResponse, PeriodoResponse, ProfesorResponse, MateriaResponse
+from app.schemas import unsis_schemas
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from typing import List
@@ -16,7 +17,7 @@ router = APIRouter(
 )
 
 # obtener periodo actual de unsis (semestre actual)
-@router.get("/current-period", response_model=PeriodoResponse)
+@router.get("/current-period", response_model=unsis_schemas.PeriodoResponse)
 def get_current_exam_period(db: Session = Depends(get_db)):
     """
     Retorna el periodo actual de exámenes en formato JSON estándar.
@@ -28,8 +29,19 @@ def get_current_exam_period(db: Session = Depends(get_db)):
 
     return current_period
 
+# actualizar datos de periodo actual de unsis
+@router.post("/update-current-period", response_model=unsis_schemas.PeriodoResponse)
+def update_current_unsis_period(period: unsis_schemas.PeriodoResponse, db: Session = Depends(get_db)):
+    """
+    Insertar o actualizar las fechas de parciales del periodo actual.
+    """
+    updated_period = unsis_repository.update_current_period(db, period)
+    if not updated_period:
+        raise HTTPException(status_code=404, detail="No se pudo actualizar el periodo actual.")
+    return updated_period
+
 # obtener carreras activas
-@router.get("/degrees", response_model=List[CarreraResponse])
+@router.get("/degrees", response_model=List[unsis_schemas.CarreraResponse])
 def get_active_degrees(db: Session = Depends(get_db)):
     """
     Retorna la lista de carreras activas en formato JSON estándar.
@@ -42,7 +54,7 @@ def get_active_degrees(db: Session = Depends(get_db)):
     return degrees
 
 # obtener aulas 
-@router.get("/classrooms", response_model=List[AulaResponse])
+@router.get("/classrooms", response_model=List[unsis_schemas.AulaResponse])
 def get_all_classrooms(db: Session = Depends(get_db)):
     """
     Retorna la lista de aulas disponibles en formato JSON estándar.
@@ -55,7 +67,7 @@ def get_all_classrooms(db: Session = Depends(get_db)):
     return classrooms
 ####################GRUPOS#########################
 # obtener todos los grupos
-@router.get("/groups", response_model=List[GrupoResponse])
+@router.get("/groups", response_model=List[unsis_schemas.GrupoResponse])
 def get_all_groups(db: Session = Depends(get_db)):
     """
     Retorna la lista de grupos en formato JSON estándar.
@@ -68,7 +80,7 @@ def get_all_groups(db: Session = Depends(get_db)):
     return groups
 
 # Obtenr grupos por carrera
-@router.get("/groups-by-degree/{degree_id}", response_model=List[GrupoResponse])
+@router.get("/groups-by-degree/{degree_id}", response_model=List[unsis_schemas.GrupoResponse])
 def get_groups_by_degree(degree_id: str, db: Session = Depends(get_db)):
     """
     Retorna la lista de grupos para una carrera específica en formato JSON estándar.
@@ -81,7 +93,7 @@ def get_groups_by_degree(degree_id: str, db: Session = Depends(get_db)):
     return groups
 
 # obtener grupos por carrera y semestre
-@router.get("/groups-by-degree-and-semester/{degree_id}/{semester}", response_model=List[GrupoResponse])
+@router.get("/groups-by-degree-and-semester/{degree_id}/{semester}", response_model=List[unsis_schemas.GrupoResponse])
 def get_groups_by_degree_and_semester(degree_id: str, semester: int, db: Session = Depends(get_db)):
     """
     Retorna la lista de grupos para una carrera y semestre específicos en formato JSON estándar.
@@ -94,7 +106,7 @@ def get_groups_by_degree_and_semester(degree_id: str, semester: int, db: Session
     return groups
 
 # obtener grupos por materia
-@router.get("/groups-by-subject/{subject_id}", response_model=List[GrupoResponse])
+@router.get("/groups-by-subject/{subject_id}", response_model=List[unsis_schemas.GrupoResponse])
 def get_groups_by_subject(subject_id: str, db: Session = Depends(get_db)):
     """
     Retorna la lista de grupos que cursan una materia específica en formato JSON estándar.
@@ -108,7 +120,7 @@ def get_groups_by_subject(subject_id: str, db: Session = Depends(get_db)):
 
 ####################MATERIAS#########################
 # obtener todas las materias
-@router.get("/subjects", response_model=List[MateriaResponse])
+@router.get("/subjects", response_model=List[unsis_schemas.MateriaResponse])
 def get_all_subjects(db: Session = Depends(get_db)):
     """
     Retorna la lista de materias en formato JSON estándar.
@@ -121,7 +133,7 @@ def get_all_subjects(db: Session = Depends(get_db)):
     return subjects
 
 # obtener materias por carrera
-@router.get("/subjects-by-degree/{degree_id}", response_model=List[MateriaResponse])
+@router.get("/subjects-by-degree/{degree_id}", response_model=List[unsis_schemas.MateriaResponse])
 def get_subjects_by_degree(degree_id: str, db: Session = Depends(get_db)):
     """
     Retorna la lista de materias para una carrera específica en formato JSON estándar.
@@ -134,7 +146,7 @@ def get_subjects_by_degree(degree_id: str, db: Session = Depends(get_db)):
     return subjects
 
 # obtener materias por carrera y semestre
-@router.get("/subjects-by-degree-and-semester/{degree_id}/{semester}", response_model=List[MateriaResponse])
+@router.get("/subjects-by-degree-and-semester/{degree_id}/{semester}", response_model=List[unsis_schemas.MateriaResponse])
 def get_subjects_by_degree_and_semester(degree_id: str, semester: int, db: Session = Depends(get_db)):
     """
     Retorna la lista de materias para una carrera y semestre específicos en formato JSON estándar.
@@ -148,7 +160,7 @@ def get_subjects_by_degree_and_semester(degree_id: str, semester: int, db: Sessi
 
 ####################HORARIOS#########################
 # obtener todos los horarios
-@router.get("/schedules", response_model=List[HorarioResponse])
+@router.get("/schedules", response_model=List[unsis_schemas.HorarioResponse])
 def get_all_schedules(db: Session = Depends(get_db)):
     """
     Retorna la lista de horarios en formato JSON estándar.
@@ -161,7 +173,7 @@ def get_all_schedules(db: Session = Depends(get_db)):
     return schedules
 
 # obtener horarios por grupo
-@router.get("/schedules-by-group/{group_id}", response_model=List[HorarioResponse])
+@router.get("/schedules-by-group/{group_id}", response_model=List[unsis_schemas.HorarioResponse])
 def get_schedules_by_group(group_id: str, db: Session = Depends(get_db)):
     """
     Retorna la lista de horarios para un grupo específico en formato JSON estándar.
@@ -175,7 +187,7 @@ def get_schedules_by_group(group_id: str, db: Session = Depends(get_db)):
 
 ####################PROFESORES#########################
 # obtener todos los profesores
-@router.get("/professors", response_model=List[ProfesorResponse])
+@router.get("/professors", response_model=List[unsis_schemas.ProfesorResponse])
 def get_all_professors(db: Session = Depends(get_db)):
     """
     Retorna la lista de profesores en formato JSON estándar.
@@ -188,7 +200,7 @@ def get_all_professors(db: Session = Depends(get_db)):
     return professors
 
 # obtener profesores por materia
-@router.get("/professors-by-subject/{subject_id}", response_model=List[ProfesorResponse])
+@router.get("/professors-by-subject/{subject_id}", response_model=List[unsis_schemas.ProfesorResponse])
 def get_professors_by_subject(subject_id: str, db: Session = Depends(get_db)):
     """
     Retorna la lista de profesores que imparten una materia específica en formato JSON estándar.

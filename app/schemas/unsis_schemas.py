@@ -67,6 +67,10 @@ class PeriodoResponse(BaseModel):
     extra2_inicio: Optional[date] = None
     extra2_fin: Optional[date] = None
 
+    # Especial
+    especial_inicio: Optional[date] = None
+    especial_fin: Optional[date] = None
+
     class Config:
         from_attributes = True
 
