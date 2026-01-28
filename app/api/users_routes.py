@@ -12,8 +12,7 @@ from app.services.user_service import (
     toggle_user_active_status, 
     get_all_users, 
     change_user_role,
-    get_jefes_carrera,
-    get_degree_managed_by_user
+    get_jefes_carrera
 )
 from app.dependencies import get_db
 from app.core.security import get_current_user
@@ -84,25 +83,6 @@ def get_jefes_carrera_route(db: Session = Depends(get_db), current_user=Depends(
     """
     jefes = get_jefes_carrera(db)
     return jefes
-
-# obtener carrera gestionada por el usuario actual
-@router.get("/me/degree")
-def get_my_degree(db: Session = Depends(get_db), current_user=Depends(get_current_user)):
-    """
-    Obtiene la carrera gestionada por el usuario actual (solo JEFE_CARRERA).
-    """
-    if current_user.role != "JEFE_CARRERA":
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Solo los jefes de carrera pueden consultar su carrera"
-        )
-    
-    degree = get_degree_managed_by_user(db, current_user.id)
-    if not degree:
-        return {"message": "No tienes una carrera asignada"}
-    
-    from app.schemas.degree_schemas import DegreeRead
-    return DegreeRead.model_validate(degree)
 
 # borrar usuario especificado
 @router.delete("/{username}", response_model=UserRead)

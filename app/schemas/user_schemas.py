@@ -23,7 +23,7 @@ class DegreeInfo(BaseModel):
 class UserCreate(BaseModel):
     username: str = "admin"
     email: Optional[EmailStr] = "j.lopezlopez1004@gmail.com"
-    password: str = "admin123"
+    password: str = "admin123" 
     role: RoleEnum = RoleEnum.ADMIN
 
 
