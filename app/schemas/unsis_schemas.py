@@ -1,14 +1,17 @@
 from datetime import date
 from pydantic import BaseModel
-from typing import Optional
+from typing import Optional, Dict, Any
+
 # Este es el molde de cómo se verá el JSON de cada grupo
 class GrupoResponse(BaseModel):
     clave: str
     nombre: str
     semestre: int
-    alumnos: int
+    alumnos: int | None = None
     carrera_id: str  # O el nombre que uses en tu modelo
     periodo_id: str
+    alumnos: Optional[Dict[str, Any]] = None  # Campo JSON opcional
+    datos_adicionales: Optional[Dict[str, Any]] = None  # Campo JSON opcional
 
     class Config:
         # Esto es vital: le dice a Pydantic que lea los datos desde el objeto ORM de SQLAlchemy

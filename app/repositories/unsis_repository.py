@@ -7,8 +7,8 @@ from sqlalchemy.orm import Session
 # otener cursos por carrera
 def get_courses_by_degree(db: Session, degree_id: str):
     # TODO: devolver materias activas por carrera 
-    # return db.query(models.Course).filter(models.Course.degree_id == degree_id).all()
-    return []
+    return db.query(unsis.Materia).filter(unsis.Carrera.clave == degree_id).all()
+    #return []
 
 # obtener aulas
 def get_all_classrooms(db: Session):
@@ -128,3 +128,23 @@ def update_current_period(db: Session, period_update: PeriodoResponse):
     db.commit()
     db.refresh(current_period)
     return current_period 
+
+
+
+################## Propuesta
+
+def get_exam_periods_dates(db: Session):
+    """Obtener las fechas de todos los periodos de examen del periodo actual"""
+    current_period = get_current_unsis_period(db)
+    if not current_period:
+        return None
+    
+    return {
+        "PRIMER_PARCIAL": (current_period.primer_parcial_inicio, current_period.primer_parcial_fin),
+        "SEGUNDO_PARCIAL": (current_period.segundo_parcial_inicio, current_period.segundo_parcial_fin),
+        "TERCER_PARCIAL": (current_period.tercer_parcial_inicio, current_period.tercer_parcial_fin),
+        "ORDINARIO": (current_period.ordinario_inicio, current_period.ordinario_fin),
+        "EXTRA_1": (current_period.extra1_inicio, current_period.extra1_fin),
+        "EXTRA_2": (current_period.extra2_inicio, current_period.extra2_fin),
+        "ESPECIAL": (current_period.especial_inicio, current_period.especial_fin),
+    }
