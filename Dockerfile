@@ -1,4 +1,4 @@
-FROM python:3.13-slim
+FROM python:3.13-alpine
 
 # Prevents Python from writing pyc files to disk and buffering stdout/stderr
 ENV PYTHONDONTWRITEBYTECODE=1
@@ -7,23 +7,24 @@ ENV PYTHONUNBUFFERED=1
 WORKDIR /app
 
 # Install system dependencies required to build some Python packages
-RUN apt-get update \
-    && apt-get install -y --no-install-recommends \
-       build-essential \
-       gcc \
-       libpq-dev \
-       curl \
-    && rm -rf /var/lib/apt/lists/*
+# Alpine uses apk instead of apt-get
+RUN apk add --no-cache \
+    build-base \
+    gcc \
+    musl-dev \
+    postgresql-dev \
+    libffi-dev \
+    curl
 
 # Copy only dependency files first for better layer caching
 COPY pyproject.toml poetry.lock* /app/
 
 # Install Poetry and project dependencies (no dev)
-# Note: newer Poetry versions use `--without dev` instead of `--no-dev`.
-RUN pip install --upgrade pip setuptools wheel \
-    && pip install poetry \
+RUN pip install --no-cache-dir --upgrade pip setuptools wheel \
+    && pip install --no-cache-dir poetry \
     && poetry config virtualenvs.create false \
-    && poetry install --no-interaction --no-ansi --without dev
+    && poetry install --no-interaction --no-ansi --without dev \
+    && rm -rf /root/.cache/pypoetry
 
 # Copy application code
 COPY . /app

@@ -5,7 +5,7 @@ from pydantic_settings import BaseSettings
 
 
 class Settings(BaseSettings):
-    model_config = ConfigDict(env_file=".env")
+    model_config = ConfigDict(env_file=".env", extra="ignore")
 
     DATABASE_URL: Optional[str] = None
     SECRET_KEY: str = "changeme"
