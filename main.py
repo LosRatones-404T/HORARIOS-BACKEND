@@ -27,12 +27,12 @@ app = FastAPI(
     version="1.0.0"
 )
 
-# Configurar CORS
+# Configurar CORS para Siplex
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
-        "http://localhost:3000",
-        "http://132.18.38.133:3000"
+        "http://localhost:8080",      # Acceso local vía Proxy
+        "http://132.18.38.133:8080"  # Acceso servidor vía Proxy
     ],
     allow_credentials=True,
     allow_methods=["*"],
