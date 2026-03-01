@@ -1,63 +1,59 @@
-from sqlalchemy import create_engine
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
-import os
-from dotenv import load_dotenv
+from sqlalchemy import create_engine, event, text
+from sqlalchemy.orm import sessionmaker, declarative_base
+from app.core.config import settings
+import logging
 
-# Cargar variables de entorno
-load_dotenv()
+logger = logging.getLogger(__name__)
 
-# Obtener URL de la base de datos
-DATABASE_URL = os.getenv("DATABASE_URL")
-
-# Crear el motor de SQLAlchemy
+# Crear el engine de SQLAlchemy
 engine = create_engine(
-    DATABASE_URL,
-    echo=True,  # Muestra las consultas SQL en consola (útil para desarrollo)
-    pool_pre_ping=True,  # Verifica la conexión antes de usarla
-    pool_size=5,  # Número de conexiones en el pool
-    max_overflow=10  # Conexiones adicionales si se necesitan
+    settings.DATABASE_URL,
+    pool_pre_ping=True,
+    echo=False,
+    pool_size=10,
+    max_overflow=20
 )
 
-# Crear sesión local
-SessionLocal = sessionmaker(
-    autocommit=False,
-    autoflush=False,
-    bind=engine
-)
+# Crear la sesión
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 # Base para los modelos
 Base = declarative_base()
 
-
-# Función para crear las tablas en la BD
-def create_tables():
-    """Crea todas las tablas definidas en los modelos"""
-    # Importar todos los modelos para que sean registrados por SQLAlchemy
-    from app.models import models, unsis
-    Base.metadata.create_all(bind=engine)
-
-
-# Función para verificar conexión
-def test_connection():
-    """Prueba la conexión a la base de datos"""
-    try:
-        with engine.connect() as connection:
-            print("Conexión exitosa a la base de datos")
-            return True
-    except Exception as e:
-        print(f"Error de conexión: {e}")
-        return False
-
-
-# Dependency generator para FastAPI: abrir y cerrar sesiones correctamente
 def get_db():
-    """Yield a database session and ensure it is closed after use.
-
-    Use in routes as: db: Session = Depends(get_db)
-    """
+    """Dependency para obtener la sesión de base de datos"""
     db = SessionLocal()
     try:
         yield db
     finally:
         db.close()
+
+def create_tables():
+    """Crea todas las tablas definidas en los modelos"""
+    try:
+        # Crear el schema 'unsis' si no existe
+        with engine.connect() as conn:
+            conn.execute(text("CREATE SCHEMA IF NOT EXISTS unsis"))
+            conn.commit()
+            logger.info("Schema 'unsis' verificado/creado")
+        
+        # Importar todos los modelos para que SQLAlchemy los conozca
+        from app.models import models, unsis
+        
+        # Crear todas las tablas
+        Base.metadata.create_all(bind=engine)
+        logger.info("Tablas creadas exitosamente")
+    except Exception as e:
+        logger.error(f"Error creando tablas: {e}")
+        raise
+
+def test_connection():
+    """Prueba la conexión a la base de datos"""
+    try:
+        with engine.connect() as connection:
+            connection.execute(text("SELECT 1"))
+        logger.info("Conexión exitosa a la base de datos")
+        return True
+    except Exception as e:
+        logger.error(f"Error conectando a la base de datos: {e}")
+        return False

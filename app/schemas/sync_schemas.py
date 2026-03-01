@@ -30,3 +30,20 @@ class AulaSchema(BaseModel):
     capacidad: int
     tipo: str
     statusProyector: Optional[str] = None
+
+class HorarioItemSchema(BaseModel):
+    rowId: int
+    dia: int
+    hora: int
+    
+    # IDs para relaciones
+    idGrupo: str
+    idAula: Optional[str] = None # A veces puede venir null o vacío
+    idprofesor: Optional[str] = None
+    asignatura: str # ID de la materia
+    
+    # Campos de texto para guardar en tablas catalogo (Profesor/Materia)
+    nombreCompleto: Optional[str] = None
+    materia: str # Nombre de la materia
+    
+    # Campos que ignoraremos porque ya los tenemos por relación (nombreGrupo, nombreAula, carrera, etc.)

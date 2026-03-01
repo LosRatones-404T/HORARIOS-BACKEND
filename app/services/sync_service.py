@@ -9,7 +9,8 @@ class SyncService:
     def __init__(self, db: Session):
         self.repo = SyncRepository(db)
         # Usar variable de entorno, con fallback a host.docker.internal para Docker
-        self.base_url = os.getenv("EXTERNAL_API_URL", "http://host.docker.internal:3000/api")
+        # self.base_url = os.getenv("EXTERNAL_API_URL", "http://host.docker.internal:3000/api")
+        self.base_url = os.getenv("EXTERNAL_API_URL", "http://10.42.0.152:3000/api")
 
     def sync_all(self):
         try:
@@ -41,6 +42,20 @@ class SyncService:
             for g in g_data_list:
                 g_valido = GrupoSchema(**g)
                 self.repo.upsert_grupo(g_valido.model_dump())
+
+            print("Sincronizando Horarios Completos...")
+            
+            # endpoint ej: /horarios_completos
+            data_dict = self._fetch_data("/horarios/todos") 
+            
+            # El JSON es un Dict: {"104-A": [obj, obj], "106-A": [...]}
+            # Iteramos sobre las llaves (Grupos)
+            for grupo_key, lista_horarios in data_dict.items():
+                
+                for item in lista_horarios:
+                    # Validar datos básicos (opcional usar Schema aquí)
+                    # upsert
+                    self.repo.upsert_horario(item)
 
             # Confirmar cambios en BD
             self.repo.db.commit()

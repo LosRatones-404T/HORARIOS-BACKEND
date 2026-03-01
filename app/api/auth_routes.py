@@ -3,8 +3,8 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 
-from app.schemas.user_schemas import UserCreate, UserRead, Token
-from app.services.user_service import register_user, authenticate_user, create_token_for_user
+from app.schemas.user_schemas import UserCreate, UserRead, Token, UserCreateJefe
+from app.services.user_service import register_user, authenticate_user, create_token_for_user, register_user_jefe
 from app.dependencies import get_db
 from app.core.security import get_current_user
 
@@ -21,6 +21,18 @@ def register(user_in: UserCreate, db: Session = Depends(get_db)):
     if get_user_by_username(db, user_in.username):
         raise HTTPException(status_code=400, detail="Username already registered")
     user = register_user(db, user_in)
+    return user
+
+@router.post("/register-jefe_carrera", response_model=UserRead, status_code=status.HTTP_201_CREATED)
+def register_jefe(user_in: UserCreateJefe, db: Session = Depends(get_db)):
+    print("Registering user:", user_in.username)
+    existing = authenticate_user(db, user_in.username, user_in.password)
+    # simple check: username must be unique
+    from app.repositories.user_repository import get_user_by_username
+
+    if get_user_by_username(db, user_in.username):
+        raise HTTPException(status_code=400, detail="Username already registered")
+    user = register_user_jefe(db, user_in)
     return user
 
 

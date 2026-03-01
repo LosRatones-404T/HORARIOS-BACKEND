@@ -1,3 +1,4 @@
+# filepath: /home/jlopez/Documentos/Proyectos_Python/HORARIOS-BACKEND/app/repositories/user_repository.py
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
 from app.models import models
@@ -57,17 +58,12 @@ def update_user(db: Session, user_id: int, **kwargs) -> Optional[models.User]:
     return user
 
 
-def delete_user(db: Session, username: str) -> Optional[models.User]:
-    """Elimina un usuario por su nombre de usuario"""
-    user = get_user_by_username(db, username)
-    if user:
-        db.delete(user)
-        db.commit()
-        return user
+def delete_user(db: Session, user_id: int) -> bool:
+    """Elimina un usuario (soft delete)"""
+    user = get_user_by_id(db, user_id)
+    if not user:
+        return False
     
-
-
-# ELIMINAR O COMENTAR ESTA FUNCIÓN - Ya no existe Degree
-# def get_degree_managed_by_user(db: Session, user_id: int) -> models.Degree | None:
-#     """Obtiene la carrera gestionada por un usuario coordinador"""
-#     return db.query(models.Degree).filter(models.Degree.coordinator_id == user_id).first()
+    user.is_active = False
+    db.commit()
+    return True
